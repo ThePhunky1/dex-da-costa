@@ -11,9 +11,10 @@ import { readPool } from '../lib/pool';
 import { isFreshMarketPrice, type MarketPrice } from '../lib/market-price';
 import { pairedLiquidityInput } from '../lib/liquidity-input';
 import { WalletMenu } from './wallet-menu';
+import { BalanceButtons } from './balance-buttons';
+import { gasReserve } from '../lib/balance-fill';
 import { Orbit } from './orbit';
 function TokenIcon({symbol}:{symbol:'HYPE'|'USDC'}){return <Image className="tokenIcon" src={`/tokens/${symbol.toLowerCase()}.svg`} width={32} height={32} alt="" aria-hidden="true"/>;}
-const gasReserve=1000000000000000n;
 function errorText(error:unknown){return error instanceof Error?error.message.split('\n')[0]:'The transaction could not be completed.';}
 function short(address:string){return `${address.slice(0,6)}…${address.slice(-4)}`;}
 export default function Home(){
@@ -56,6 +57,7 @@ export default function Home(){
  const insufficient=!!p&&(tab==='swap'?(hypeIn?n+gasReserve>(p.hypeBalance??0n):n>(p.usdcBalance??0n)):
  tab==='add'?h+gasReserve>(p.hypeBalance??0n)||u>(p.usdcBalance??0n):lp>(p.lpBalance??0n));
  const valid=tab==='swap'?n>0n&&minOut>0n&&impact<=500:tab==='add'?usedH>0n&&usedU>0n&&minimum(usedH,bps)>0n&&minimum(usedU,bps)>0n&&(!empty||bootstrap):lp>0n&&minimum(removeH,bps)>0n&&minimum(removeU,bps)>0n;
+ const fillsDisabled=!mounted||!isConnected||wrongNetwork||busy||pool.isError||!p||Date.now()-pool.dataUpdatedAt>30000;
  const disabled=!mounted||!isConnected||wrongNetwork||!wallet||!p||pool.isError||Date.now()-pool.dataUpdatedAt>30000||busy||!valid||insufficient||(approvalAmount>0n&&(allowance.isPending||allowance.isError));
  useEffect(()=>{setError('');setStatus('');setHash(undefined);setBootstrap(false);},[address,chainId,tab]);
  async function submit(){
@@ -112,15 +114,15 @@ export default function Home(){
     {!routerAddress&&<div className="notice">Testnet preview · Swaps open after pool deployment.</div>}
     {wrongNetwork&&<button className="networkSwitch" disabled={switching} onClick={()=>switchChain({chainId:elysium.id})}>{switching?'Switching…':`Switch to ${elysium.name}`}</button>}
     {tab==='swap'?<>
-     <div className="tokenBox"><label htmlFor="swapAmount">You pay</label><div className="amountRow"><input id="swapAmount" inputMode="decimal" placeholder="0.00" value={input} disabled={busy} onChange={e=>setInput(e.target.value)}/><span className="token"><TokenIcon symbol={inputSymbol}/>{inputSymbol}</span></div><small>Balance: {display(hypeIn?p?.hypeBalance:p?.usdcBalance,hypeIn?18:6)}</small></div>
+     <div className="tokenBox"><label htmlFor="swapAmount">You pay</label><div className="amountRow"><input id="swapAmount" inputMode="decimal" placeholder="0.00" value={input} disabled={busy} onChange={e=>setInput(e.target.value)}/><span className="token"><TokenIcon symbol={inputSymbol}/>{inputSymbol}</span></div><div className="balanceFooter"><small>Balance: {display(hypeIn?p?.hypeBalance:p?.usdcBalance,hypeIn?18:6)}</small><BalanceButtons balance={hypeIn?p?.hypeBalance:p?.usdcBalance} decimals={hypeIn?18:6} symbol={inputSymbol} reserve={hypeIn?gasReserve:0n} disabled={fillsDisabled} onFill={setInput}/></div></div>
      <button className="reverse" disabled={busy} aria-label="Reverse swap direction" onClick={()=>{setHypeIn(!hypeIn);setInput('');}}>↓</button>
      <div className="tokenBox"><label>You receive · estimated</label><div className="amountRow"><output>{output>0n?display(output,hypeIn?6:18):'0.00'}</output><span className="token"><TokenIcon symbol={outputSymbol}/>{outputSymbol}</span></div><small>Balance: {display(hypeIn?p?.usdcBalance:p?.hypeBalance,hypeIn?6:18)}</small></div>
      <dl><div><dt>Minimum received</dt><dd>{display(minOut,hypeIn?6:18)} {outputSymbol}</dd></div><div><dt>Price impact <small>(excludes fee)</small></dt><dd className={impact>300?'warning':''}>{(impact/100).toFixed(2)}%</dd></div><div><dt>Liquidity provider fee</dt><dd>0.30%</dd></div></dl>
      {impact>500&&<p className="notice">This trade moves the pool price too far. Try a smaller amount (maximum 5% impact).</p>}
      {p&&p.supply===0n&&<p className="notice">This pool is empty. Add the first liquidity to enable swaps.</p>}
     </>:tab==='add'?<>
-     <div className="tokenBox"><label htmlFor="hypeAmount">Maximum HYPE</label><div className="amountRow"><input id="hypeAmount" inputMode="decimal" placeholder="0.00" value={hype} disabled={busy} onChange={e=>{setBootstrap(false);setLiquidityInput({side:'hype',text:e.target.value});}}/><span className="token"><TokenIcon symbol="HYPE"/>HYPE</span></div><small>Balance: {display(p?.hypeBalance)}</small></div>
-     <div className="tokenBox separated"><label htmlFor="usdcAmount">Maximum USDC</label><div className="amountRow"><input id="usdcAmount" inputMode="decimal" placeholder="0.00" value={usdc} disabled={busy} onChange={e=>{setBootstrap(false);setLiquidityInput({side:'usdc',text:e.target.value});}}/><span className="token"><TokenIcon symbol="USDC"/>USDC</span></div><small>Balance: {display(p?.usdcBalance,6)}</small></div>
+     <div className="tokenBox"><label htmlFor="hypeAmount">Maximum HYPE</label><div className="amountRow"><input id="hypeAmount" inputMode="decimal" placeholder="0.00" value={hype} disabled={busy} onChange={e=>{setBootstrap(false);setLiquidityInput({side:'hype',text:e.target.value});}}/><span className="token"><TokenIcon symbol="HYPE"/>HYPE</span></div><div className="balanceFooter"><small>Balance: {display(p?.hypeBalance)}</small><BalanceButtons balance={p?.hypeBalance} decimals={18} symbol="HYPE" reserve={gasReserve} disabled={fillsDisabled} onFill={text=>{setBootstrap(false);setLiquidityInput({side:'hype',text});}}/></div></div>
+     <div className="tokenBox separated"><label htmlFor="usdcAmount">Maximum USDC</label><div className="amountRow"><input id="usdcAmount" inputMode="decimal" placeholder="0.00" value={usdc} disabled={busy} onChange={e=>{setBootstrap(false);setLiquidityInput({side:'usdc',text:e.target.value});}}/><span className="token"><TokenIcon symbol="USDC"/>USDC</span></div><div className="balanceFooter"><small>Balance: {display(p?.usdcBalance,6)}</small><BalanceButtons balance={p?.usdcBalance} decimals={6} symbol="USDC" disabled={fillsDisabled} onFill={text=>{setBootstrap(false);setLiquidityInput({side:'usdc',text});}}/></div></div>
      <p className="hint">{empty?(reference?'Suggested starting amounts use the live mainnet reference. Your first deposit sets the testnet pool price; it will not stay pegged to mainnet.':'A fresh market reference is needed to suggest the first deposit. Please wait for the feed to reconnect.'):'Amounts automatically match this testnet pool’s reserve ratio, which can differ from the mainnet reference.'}</p>
      <dl><div><dt>Expected deposit</dt><dd>{display(usedH)} HYPE + {display(usedU,6)} USDC</dd></div><div><dt>Minimum accepted</dt><dd>{display(minimum(usedH,bps))} HYPE + {display(minimum(usedU,bps),6)} USDC</dd></div></dl>
      <p className="hint">The router matches the pool ratio, refunds unused HYPE and only transfers the USDC needed. Keep HYPE for gas.</p>
