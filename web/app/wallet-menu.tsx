@@ -2,11 +2,12 @@
 import {useEffect,useRef,useState} from 'react';
 import {useConnection,useConnect,useConnectors,useDisconnect} from 'wagmi';
 
-function WalletIcon({icon}:{icon?:string}){
- const [failed,setFailed]=useState(false);
+function WalletIcon({icon,id,name}:{icon?:string;id?:string;name?:string}){
+ const [failedSource,setFailedSource]=useState<string>();
+ const source=id==='app.phantom'||name==='Phantom'?'/wallets/phantom.svg':icon?.startsWith('data:image/')?icon:undefined;
  // EIP-6963 icons are rendered as images, never injected SVG markup.
- return icon?.startsWith('data:image/')&&!failed
-  ? <img className="walletProviderIcon" src={icon} alt="" width={40} height={40} onError={()=>setFailed(true)}/>
+ return source&&failedSource!==source
+  ? <img className="walletProviderIcon" src={source} alt="" width={40} height={40} onError={()=>setFailedSource(source)}/>
   : <span className="walletProviderIcon walletFallback" aria-hidden="true">▣</span>;
 }
 export function WalletMenu(){
@@ -41,7 +42,7 @@ export function WalletMenu(){
    <div className="walletDialogTop"><span className="eyebrow">DEX DA COSTA</span><button className="walletClose" onClick={close} aria-label="Close wallet dialog">×</button></div>
    <h2 id="wallet-dialog-title">{isConnected?'Your wallet':'Connect a wallet'}</h2>
    <p id="wallet-dialog-description">{isConnected?'Connected to Dex Da Costa.':choices.length?'Choose a wallet detected in this browser.':'No compatible wallet detected. Open this site in your wallet’s browser, or enable an Ethereum wallet extension and refresh.'}</p>
-   {isConnected?<div className="walletAccount"><WalletIcon icon={connector?.icon}/><strong>{connector?.name||'Browser wallet'}</strong><code>{address}</code><button className="primary" onClick={()=>{disconnect();close();}}>Disconnect</button></div>:<div className="walletChoices">{choices.map(c=><button key={c.uid} className="walletChoice" disabled={isPending} onClick={()=>void choose(c)}><WalletIcon icon={c.icon}/><span><strong>{c.id==='injected'?'Browser wallet':c.name}</strong><small>{isPending&&selected===c.uid?'Waiting for approval…':'Detected'}</small></span><span className="walletChoiceArrow" aria-hidden="true">↗</span></button>)}</div>}
+   {isConnected?<div className="walletAccount"><WalletIcon icon={connector?.icon} id={connector?.id} name={connector?.name}/><strong>{connector?.name||'Browser wallet'}</strong><code>{address}</code><button className="primary" onClick={()=>{disconnect();close();}}>Disconnect</button></div>:<div className="walletChoices">{choices.map(c=><button key={c.uid} className="walletChoice" disabled={isPending} onClick={()=>void choose(c)}><WalletIcon icon={c.icon} id={c.id} name={c.name}/><span><strong>{c.id==='injected'?'Browser wallet':c.name}</strong><small>{isPending&&selected===c.uid?'Waiting for approval…':'Detected'}</small></span><span className="walletChoiceArrow" aria-hidden="true">↗</span></button>)}</div>}
    {isPending&&<p role="status" className="status">Approve the connection in your wallet. You can close this popup while waiting.</p>}
    {error&&<p role="alert" className="error">{error}</p>}
    {!isConnected&&<p className="walletFootnote">Connecting does not authorize a transaction. You stay in control of every signature.</p>}

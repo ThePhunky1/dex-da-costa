@@ -16,3 +16,7 @@ Unmodified official brand-kit SVGs, retrieved 2026-09-26:
 - `web/public/tokens/usdc.svg`: `Token Logo/USDC Token.svg` from Circle’s USDC logo archive at https://www.circle.com/pressroom (https://6778953.fs1.hubspotusercontent-na1.net/hubfs/6778953/Pressroom/brandkit/logo-downloads/usdc.zip).
 
 Brand marks remain the property of their respective owners and are not covered by this project’s GPL license. Used to identify tokens; no endorsement or mainnet issuance claim is implied.
+
+## Wallet logos
+
+`web/public/wallets/phantom.svg` is the unmodified Phantom ghost favicon from the official Phantom documentation site (https://docs.phantom.com), retrieved 2026-09-26: https://mintcdn.com/phantom-e50e2e68/tU9g5MXFXgx4l6Em/favicon.svg?fit=max. The mark remains Phantom’s property and is excluded from this project’s GPL license. Other wallet icons are supplied by their installed providers through EIP-6963.
