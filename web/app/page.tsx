@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
-import { useConnection, useConnect, useConnectors, useDisconnect, usePublicClient, useSwitchChain, useWalletClient } from 'wagmi';
+import { useConnection, usePublicClient, useSwitchChain, useWalletClient } from 'wagmi';
 import { formatUnits, erc20Abi, type Abi, type Address, type Hash } from 'viem';
 import { elysium, explorer, localDemo, routerAddress, usdcAddress } from '../lib/config';
 import { routerAbi } from '../lib/abi';
@@ -10,6 +10,7 @@ import { amount, display, impactBps, liquidityAmounts, minimum, quote } from '..
 import { readPool } from '../lib/pool';
 import { isFreshMarketPrice, type MarketPrice } from '../lib/market-price';
 import { pairedLiquidityInput } from '../lib/liquidity-input';
+import { WalletMenu } from './wallet-menu';
 import { Orbit } from './orbit';
 function TokenIcon({symbol}:{symbol:'HYPE'|'USDC'}){return <Image className="tokenIcon" src={`/tokens/${symbol.toLowerCase()}.svg`} width={32} height={32} alt="" aria-hidden="true"/>;}
 const gasReserve=1000000000000000n;
@@ -19,8 +20,7 @@ export default function Home(){
  const [mounted,setMounted]=useState(false);
  useEffect(()=>setMounted(true),[]);
  const {address,chainId,isConnected}=useConnection();
- const {connect,isPending:connecting,error:connectError}=useConnect();const connectors=useConnectors();
- const {disconnect}=useDisconnect();const {switchChain,isPending:switching,error:switchError}=useSwitchChain();
+ const {switchChain,isPending:switching,error:switchError}=useSwitchChain();
  const client=usePublicClient({chainId:elysium.id});const {data:wallet}=useWalletClient();
  const [tab,setTab]=useState<'swap'|'add'|'remove'>('swap');
  const [hypeIn,setHypeIn]=useState(true);const [input,setInput]=useState('');
@@ -92,7 +92,7 @@ export default function Home(){
   <header>
    <a className="brand" href="/" aria-label="Dex Da Costa home"><span className="mark" aria-hidden="true"><i/><b/></span><span>DEX <strong>DA COSTA</strong><small>ACCESS IS FOR EVERYONE</small></span></a>
    <nav className="headerNav" aria-label="Main navigation"><a href="#exchange">Exchange</a><a href="#pool">The pool</a></nav>
-   <div className="wallet"><span className="network"><i/>{localDemo?'Local development':'Elysium testnet'}</span>{mounted&&isConnected?<button className="secondary" onClick={()=>disconnect()}>{short(address!)} · Disconnect</button>:mounted?connectors.map(c=><button className="secondary" key={c.uid} disabled={connecting} onClick={()=>connect({connector:c})}>{connecting?'Connecting…':`Connect ${c.name==='Injected'?'wallet':c.name}`}<span aria-hidden="true"> ↗</span></button>):<button className="secondary" disabled>Connect wallet ↗</button>}</div>
+   <div className="wallet"><span className="network"><i/>{localDemo?'Local development':'Elysium testnet'}</span><WalletMenu/></div>
   </header>
   <div className="workspace">
    <section className="intro">
@@ -133,7 +133,7 @@ export default function Home(){
     <button className="primary" disabled={disabled} onClick={submit}>{busy?'Transaction in progress…':!mounted||!isConnected?'Connect a wallet to continue':insufficient?'Insufficient balance':action}<span>↗</span></button>
     <p className="hint centered">{tab==='swap'&&hypeIn||tab==='add'?'0.001 HYPE reserved for gas. ':''}Transactions expire after 20 minutes.</p>
     {approvalAmount>0n&&allowance.isError&&<p role="alert" className="error">Could not read your allowance. Please retry.</p>}
-    {(error||pool.error||connectError||switchError)&&<p role="alert" className="error">{error||errorText(pool.error||connectError||switchError)}</p>}
+    {(error||pool.error||switchError)&&<p role="alert" className="error">{error||errorText(pool.error||switchError)}</p>}
     {status&&<p role="status" className="status">{status}</p>}
     {hash&&!localDemo&&<a className="transaction" href={`${explorer}/transaction/${hash}`} target="_blank" rel="noreferrer">View transaction ↗</a>}
     {hash&&localDemo&&<p className="hint">Transaction: {short(hash)}</p>}

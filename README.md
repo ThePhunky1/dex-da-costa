@@ -19,7 +19,7 @@ cp web/.env.example web/.env.local
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000`. With no router configured the app shows a deployment-pending state and disables transactions. Use an injected wallet such as MetaMask or Rabby for real wallet connection. Network settings are built in. QR WalletConnect is not included.
+Open `http://127.0.0.1:3000`. With no router configured the app shows a deployment-pending state and disables transactions. Use the single Connect wallet button to choose a detected wallet such as MetaMask or Rabby. Provider names and icons come directly from installed extensions via EIP-6963. The generic browser-wallet fallback is shown only when named discovery is unavailable. Network settings are built in. QR WalletConnect is not included.
 
 The original V2 compilers are pinned npm dependencies; Foundry automatically fetches solc 0.8.30 for the harness. `npm run contracts:build` generates bytecode/ABIs in `contracts/artifacts/`; do this before any Foundry command that deploys V2 artifacts. The pair init-code hash is generated and passed into the router library automatically. Do not mix artifacts from different builds.
 

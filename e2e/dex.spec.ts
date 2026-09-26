@@ -16,8 +16,10 @@ test.beforeEach(async({page})=>{
 });
 test('local wallet swaps both ways and adds/removes liquidity',async({page})=>{
  await page.goto('/');await expect(page.getByText('Local development',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:/^Connect (wallet|MetaMask)$/}).click();
- await expect(page.getByRole('button',{name:/Disconnect/})).toBeVisible();
+ await page.getByRole('button',{name:'Connect wallet',exact:true}).click();
+ await page.getByRole('dialog').getByRole('button',{name:'Browser wallet Detected'}).click();
+ await expect(page.getByRole('dialog')).not.toBeVisible();
+ await expect(page.locator('.walletTrigger')).toContainText('0x');
  await page.getByLabel('You pay').fill('0.1');
  await page.getByRole('button',{name:'Swap ↗',exact:true}).click();
  await expect(page.getByRole('status')).toContainText('Transaction confirmed',{timeout:20000});
@@ -37,7 +39,8 @@ test('local wallet swaps both ways and adds/removes liquidity',async({page})=>{
 });
 test('mobile layout and invalid input',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/');
- await page.getByRole('button',{name:/^Connect (wallet|MetaMask)$/}).click();
+ await page.getByRole('button',{name:'Connect wallet',exact:true}).click();
+ await page.getByRole('dialog').getByRole('button',{name:'Browser wallet Detected'}).click();
  await page.getByLabel('You pay').fill('-1');await expect(page.getByRole('button',{name:'Swap ↗',exact:true})).toBeDisabled();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
 });
