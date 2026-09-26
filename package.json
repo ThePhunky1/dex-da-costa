@@ -1,0 +1,38 @@
+{
+  "name": "personal-elysium-dex",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "contracts:build": "node scripts/compile-contracts.mjs",
+    "contracts:test": "npm run contracts:build && cd contracts && forge test -vv",
+    "dev": "npm run dev --workspace web",
+    "build": "npm run build --workspace web",
+    "typecheck": "npm run typecheck --workspace web",
+    "test": "npm run test --workspace web",
+    "verify:network": "node scripts/verify-network.mjs",
+    "demo:seed": "node scripts/local-demo.mjs",
+    "test:e2e": "playwright test",
+    "verify:deployment": "node scripts/verify-deployment.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@uniswap/v2-core": "1.0.1",
+    "@uniswap/v2-periphery": "1.1.0-beta.0",
+    "esbuild": "0.28.2",
+    "solc-core": "npm:solc@0.5.16",
+    "solc-periphery": "npm:solc@0.6.6"
+  },
+  "dependencies": {
+    "viem": "2.56.9"
+  },
+  "overrides": {
+    "tmp": "0.2.7",
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

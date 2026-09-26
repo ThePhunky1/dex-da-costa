@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-09-25T20:31:11.406Z",
+  "chainId": 99801,
+  "parentChainId": 998,
+  "rpc": "https://testnet-rpc.elysium.kinetiq.xyz",
+  "block": "213176",
+  "blockHash": "0x6377f569ff5b0ffa2c80fcc39ed596b59d92f0b96eefdc51d78ae5a0c6cbefb8",
+  "nativeAsset": "HYPE, 18 decimals, no ERC-20 address",
+  "assets": [
+    {
+      "address": "0x7D29d8047B905000459c0E80c34a26CeedcB47b2",
+      "original": "0x2B3370eE501B4a559b57D449569354196457D8Ab",
+      "representation": "0x7D29d8047B905000459c0E80c34a26CeedcB47b2",
+      "l1Address": "0x2B3370eE501B4a559b57D449569354196457D8Ab",
+      "l2Gateway": "0x30545d8b24185DdFe83E75aB6939f867b664e2E1",
+      "symbol": "USDC",
+      "decimals": 6,
+      "runtimeCodeHash": "0x487e3e7ba0f6ef76ccd39c373954f0edcdfe15c8817bdca4ef73f6df3963e694"
+    },
+    {
+      "address": "0xCD57F65c2B0e5881CFC2E609F7CD53b746E1F234",
+      "original": "0x5555555555555555555555555555555555555555",
+      "representation": "0xCD57F65c2B0e5881CFC2E609F7CD53b746E1F234",
+      "l1Address": "0x5555555555555555555555555555555555555555",
+      "l2Gateway": "0x1F8be963E0cf8315Fc703cF415bA642DfcAEeDEf",
+      "symbol": "WHYPE",
+      "decimals": 18,
+      "runtimeCodeHash": "0x5706be52f64875fee65a2cec0d80e47a23d8793cbe85d214b48445e2d05f5353"
+    }
+  ],
+  "notes": [
+    "WHYPE above is bridged HyperEVM WHYPE; it is NOT our native-HYPE wrapper.",
+    "USDC is the official bridge-listed test token representation; this does not establish Circle issuance or monetary value."
+  ]
+}

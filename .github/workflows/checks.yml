@@ -1,0 +1,32 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.3
+      - run: npm ci
+      - run: npm run contracts:test
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npx playwright install --with-deps chromium
+      - name: Local browser integration
+        run: |
+          anvil --host 127.0.0.1 --port 8545 --block-time 1 --silent &
+          for attempt in 1 2 3 4 5; do
+            if cast chain-id --rpc-url http://127.0.0.1:8545; then break; fi
+            sleep 1
+          done
+          npm run demo:seed
+          npm run test:e2e
