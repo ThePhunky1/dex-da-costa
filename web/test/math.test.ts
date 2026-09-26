@@ -24,3 +24,15 @@ test('price impact excludes liquidity fee and uses integer math',()=>{
  assert.equal(impactBps(input,quote(input,ri,ro),ri,ro),98);
  assert.equal(display(1n,18),'<0.000001');
 });
+
+test('leading-dot amounts produce the same quotes as leading-zero amounts',()=>{
+ for(const decimals of [6,18]){
+  assert.equal(amount('.1',decimals),amount('0.1',decimals));
+  assert.equal(amount('.000001',decimals),amount('0.000001',decimals));
+  for(const value of ['.','..1','.1.2','.1e3','-.1','.0000000000000000001'])assert.equal(amount(value,decimals),0n);
+ }
+ assert.equal(amount('.0000001',6),0n);
+ const rh=433000000000000000n,ru=40000000n;
+ assert.equal(quote(amount('.1',18),rh,ru),quote(amount('0.1',18),rh,ru));
+ assert.ok(quote(amount('.1',18),rh,ru)>0n);
+});

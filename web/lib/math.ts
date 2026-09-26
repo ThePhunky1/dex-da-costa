@@ -1,5 +1,6 @@
 import { formatUnits, parseUnits } from 'viem';
 export function amount(text:string,decimals:number):bigint {
+  if(text.startsWith('.'))text=`0${text}`;
   // viem parseUnits rounds excess precision. Reject it instead for transaction inputs.
   if(!new RegExp(`^\\d+(?:\\.\\d{0,${decimals}})?$`).test(text))return 0n;
   try {const n=parseUnits(text,decimals);return n>0n&&n<(1n<<112n)?n:0n;}catch{return 0n;}
