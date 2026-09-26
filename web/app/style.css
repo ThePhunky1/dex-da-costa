@@ -52,7 +52,6 @@ h1 span { color: var(--accent); }
 .marketLabel strong { font-size: 12px; font-weight: 600; }
 .marketLabel strong span { color: var(--muted); font-weight: 400; }
 .marketLabel small { display: block; color: #98ada3; font-family: var(--mono); letter-spacing: 1.3px; font-size: 8px; margin-top: 5px; }
-.marketIcon { display: grid; place-items: center; border: 1px solid #506b56; width: 31px; height: 31px; border-radius: 50%; color: var(--accent); font-size: 14px; }
 .feedState { margin-left: auto; font-family: var(--mono); font-size: 8px; letter-spacing: 1px; color: #a7b8ad; white-space: nowrap; }
 .feedState i.offline { background: #a98e65; }
 .marketNumbers { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 17px 0 15px; }
@@ -81,7 +80,6 @@ h1 span { color: var(--accent); }
 .amountRow input:focus-visible { outline-offset: 2px; outline-width: 1px; }
 .amountRow input::placeholder { color: #68817d; }
 .token { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.token b { background: #1c433c; color: #b8e5cf; border-radius: 50%; height: 26px; width: 26px; display: grid; place-items: center; font-size: 12px; font-weight: 400; border: 1px solid #315b4e; }
 .reverse { display: block; margin: -11px auto; padding: 2px; position: relative; background: #213732; border: 4px solid #122025; border-radius: 7px; color: var(--accent); font-size: 18px; width: 34px; height: 34px; z-index: 1; }
 .separated { margin-top: 12px; }
 dl { margin: 23px 0; font-size: 11px; }
@@ -131,3 +129,5 @@ footer { margin-top: 25px; padding-top: 22px; border-top: 1px solid #1f3134; dis
   .belowFold { flex-direction: column; gap: 20px; padding-top: 24px; }.links { flex-wrap: wrap; gap: 20px; font-size: 10px; }footer { font-size: 8px; line-height: 1.6; }footer span:last-child { text-align: right; max-width: 100px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; }button { transition: none; } }
+
+.tokenIcon { width: 32px; height: 32px; flex: 0 0 32px; object-fit: contain; }
