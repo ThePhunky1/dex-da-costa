@@ -1,4 +1,4 @@
-/** Display-only mainnet reference. Never import into swap or liquidity math. */
+/** Mainnet reference for display and suggested first-deposit inputs; never an execution oracle. */
 export const HYPE_TOKEN_ID = '0x0d01dc56dcaaca66ad901c959b4011ec';
 export const USDC_TOKEN_ID = '0x6d1e7cde53ba9467b783cb7c530ce054';
 export type MarketPrice = {

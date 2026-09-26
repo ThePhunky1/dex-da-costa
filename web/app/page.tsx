@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { useConnection, useConnect, useConnectors, useDisconnect, usePublicClient, useSwitchChain, useWalletClient } from 'wagmi';
-import { erc20Abi, type Abi, type Address, type Hash } from 'viem';
+import { formatUnits, erc20Abi, type Abi, type Address, type Hash } from 'viem';
 import { elysium, explorer, localDemo, routerAddress, usdcAddress } from '../lib/config';
 import { routerAbi } from '../lib/abi';
 import { amount, display, impactBps, liquidityAmounts, minimum, quote } from '../lib/math';
 import { readPool } from '../lib/pool';
 import { isFreshMarketPrice, type MarketPrice } from '../lib/market-price';
+import { pairedLiquidityInput } from '../lib/liquidity-input';
 import { Orbit } from './orbit';
 const gasReserve=1000000000000000n;
 function errorText(error:unknown){return error instanceof Error?error.message.split('\n')[0]:'The transaction could not be completed.';}
@@ -22,7 +23,7 @@ export default function Home(){
  const client=usePublicClient({chainId:elysium.id});const {data:wallet}=useWalletClient();
  const [tab,setTab]=useState<'swap'|'add'|'remove'>('swap');
  const [hypeIn,setHypeIn]=useState(true);const [input,setInput]=useState('');
- const [hype,setHype]=useState('');const [usdc,setUsdc]=useState('');const [percent,setPercent]=useState(25);
+ const [liquidityInput,setLiquidityInput]=useState<{side:'hype'|'usdc';text:string}>({side:'usdc',text:''});const [percent,setPercent]=useState(25);
  const [bps,setBps]=useState(50);const [bootstrap,setBootstrap]=useState(false);
  const [busy,setBusy]=useState(false);const [status,setStatus]=useState('');const [error,setError]=useState('');const [hash,setHash]=useState<Hash>();
  const pool=useQuery({queryKey:['pool',elysium.id,routerAddress,usdcAddress,address],queryFn:()=>readPool(client!,routerAddress!,usdcAddress!,address),enabled:!!client&&!!routerAddress&&!!usdcAddress,refetchInterval:5000,retry:1});
@@ -34,6 +35,10 @@ export default function Home(){
  },refetchInterval:30000,retry:1});
  const reference=!market.isError&&isFreshMarketPrice(market.data,now)?market.data:undefined;
  const p=pool.data;
+ const paired=pairedLiquidityInput(liquidityInput.text,liquidityInput.side,p,reference?.price);
+ const hype=liquidityInput.side==='hype'?liquidityInput.text:paired;
+ const usdc=liquidityInput.side==='usdc'?liquidityInput.text:paired;
+ useEffect(()=>setBootstrap(false),[hype,usdc]);
  const n=amount(input,hypeIn?18:6);const h=amount(hype,18);const u=amount(usdc,6);
  const output=p?quote(n,hypeIn?p.hypeReserve:p.usdcReserve,hypeIn?p.usdcReserve:p.hypeReserve):0n;
  const minOut=minimum(output,bps);const impact=p?impactBps(n,output,hypeIn?p.hypeReserve:p.usdcReserve,hypeIn?p.usdcReserve:p.hypeReserve):0;
@@ -113,11 +118,12 @@ export default function Home(){
      {impact>500&&<p className="notice">This trade moves the pool price too far. Try a smaller amount (maximum 5% impact).</p>}
      {p&&p.supply===0n&&<p className="notice">This pool is empty. Add the first liquidity to enable swaps.</p>}
     </>:tab==='add'?<>
-     <div className="tokenBox"><label htmlFor="hypeAmount">Maximum HYPE</label><div className="amountRow"><input id="hypeAmount" inputMode="decimal" placeholder="0.00" value={hype} disabled={busy} onChange={e=>setHype(e.target.value)}/><span className="token"><b>H</b>HYPE</span></div><small>Balance: {display(p?.hypeBalance)}</small></div>
-     <div className="tokenBox separated"><label htmlFor="usdcAmount">Maximum USDC</label><div className="amountRow"><input id="usdcAmount" inputMode="decimal" placeholder="0.00" value={usdc} disabled={busy} onChange={e=>setUsdc(e.target.value)}/><span className="token"><b>$</b>USDC</span></div><small>Balance: {display(p?.usdcBalance,6)}</small></div>
+     <div className="tokenBox"><label htmlFor="hypeAmount">Maximum HYPE</label><div className="amountRow"><input id="hypeAmount" inputMode="decimal" placeholder="0.00" value={hype} disabled={busy} onChange={e=>{setBootstrap(false);setLiquidityInput({side:'hype',text:e.target.value});}}/><span className="token"><b>H</b>HYPE</span></div><small>Balance: {display(p?.hypeBalance)}</small></div>
+     <div className="tokenBox separated"><label htmlFor="usdcAmount">Maximum USDC</label><div className="amountRow"><input id="usdcAmount" inputMode="decimal" placeholder="0.00" value={usdc} disabled={busy} onChange={e=>{setBootstrap(false);setLiquidityInput({side:'usdc',text:e.target.value});}}/><span className="token"><b>$</b>USDC</span></div><small>Balance: {display(p?.usdcBalance,6)}</small></div>
+     <p className="hint">{empty?(reference?'Suggested starting amounts use the live mainnet reference. Your first deposit sets the testnet pool price; it will not stay pegged to mainnet.':'A fresh market reference is needed to suggest the first deposit. Please wait for the feed to reconnect.'):'Amounts automatically match this testnet pool’s reserve ratio, which can differ from the mainnet reference.'}</p>
      <dl><div><dt>Expected deposit</dt><dd>{display(usedH)} HYPE + {display(usedU,6)} USDC</dd></div><div><dt>Minimum accepted</dt><dd>{display(minimum(usedH,bps))} HYPE + {display(minimum(usedU,bps),6)} USDC</dd></div></dl>
      <p className="hint">The router matches the pool ratio, refunds unused HYPE and only transfers the USDC needed. Keep HYPE for gas.</p>
-     {empty&&<label className="notice check"><input type="checkbox" checked={bootstrap} onChange={e=>setBootstrap(e.target.checked)}/>I understand this first deposit sets the price at {h>0n?display(u*10n**18n/h,6):'—'} USDC per HYPE.</label>}
+     {empty&&<label className="notice check"><input type="checkbox" checked={bootstrap} onChange={e=>setBootstrap(e.target.checked)}/>I understand this first deposit sets the price at {h>0n?Number(formatUnits(u*10n**18n/h,6)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}):'—'} USDC per HYPE.</label>}
     </>:<>
      <div className="position"><small>Your liquidity tokens</small><h2>{display(p?.lpBalance,18,8)} <span>LP</span></h2><label htmlFor="removePercent">Remove {percent}%</label><input id="removePercent" type="range" min="1" max="100" value={percent} disabled={busy} onChange={e=>setPercent(Number(e.target.value))}/><div className="percent">{[25,50,75,100].map(v=><button key={v} disabled={busy} className={percent===v?'selected':''} onClick={()=>setPercent(v)}>{v}%</button>)}</div></div>
      <dl><div><dt>Estimated HYPE</dt><dd>{display(removeH)}</dd></div><div><dt>Estimated USDC</dt><dd>{display(removeU,6)}</dd></div><div><dt>Minimum HYPE</dt><dd>{display(minimum(removeH,bps))}</dd></div><div><dt>Minimum USDC</dt><dd>{display(minimum(removeU,bps),6)}</dd></div></dl>
