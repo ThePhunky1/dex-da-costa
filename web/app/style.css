@@ -111,7 +111,8 @@ dt small { font-size: 9px; }
 .poolHeading { min-width: 210px; }.poolHeading h2 { font-size: 23px; font-weight: 400; letter-spacing: -.6px; margin: 10px 0; }.poolHeading h2 span { color: #617d76; margin: 0 4px; }
 .poolStatus { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; color: #889e8e; }.poolStatus i { width: 4px; height: 4px; background: #a9b292; }
 .poolStats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 28px; margin: 0; flex: 1; }
-.poolStats > div { display: block; margin: 0; }.poolStats dt { font-size: 10px; }.poolStats dd { font-size: 23px; text-align: left; margin-top: 13px; font-weight: 400; }.poolStats dd small { font-size: 9px; color: #8b9d94; margin-left: 7px; }
+.poolStats > div { display: block; margin: 0; }.poolStats dt { font-size: 10px; }.poolStats dd { font-size: 23px; text-align: left; margin-top: 13px; font-weight: 400; }.poolStats dd { overflow-wrap: anywhere; }
+.poolStats dd small { display: inline-block; font-size: 9px; color: #8b9d94; margin-left: 7px; }
 .belowFold { display: flex; align-items: start; justify-content: space-between; gap: 50px; padding: 30px 0 16px; }
 .testnetNote { display: flex; gap: 16px; max-width: 490px; }.testnetNote > span { font-size: 25px; color: #90aa83; }.testnetNote strong { font-size: 12px; font-weight: 400; }.testnetNote p { color: var(--muted); font-size: 10px; line-height: 1.7; margin-bottom: 0; }
 .links { display: flex; gap: 30px; font-size: 10px; padding-top: 8px; }.links a { white-space: nowrap; }.links span { color: var(--accent); margin-left: 10px; }
@@ -120,8 +121,8 @@ footer { margin-top: 25px; padding-top: 22px; border-top: 1px solid #1f3134; dis
   main { padding: 0 30px 22px; }.workspace { gap: 38px; grid-template-columns: minmax(0,1fr) minmax(0,440px); }.headerNav { display: none; }.wallet { gap: 16px; }h1 { font-size: 56px; }.links { gap: 15px; }.poolBar { gap: 28px; }.poolStats { gap: 14px; }
 }
 @media (max-width: 760px) {
-  main { padding: 0 20px 22px; }header { min-height: 90px; gap: 14px; flex-wrap: wrap; padding: 14px 0; }.brand { font-size: 14px; gap: 8px; }.brand small { font-size: 6px; letter-spacing: 1px; }.mark { width: 30px; height: 36px; }.mark i { inset: 2px 5px; }.mark:after { left: 10px; }
-  .wallet { margin-left: auto; align-items: flex-end; flex-direction: column; gap: 9px; }.network { font-size: 8px; }.secondary { padding: 9px 11px; font-size: 10px; }.secondary span { padding-left: 5px; }
+  main { padding: 0 20px 22px; }header { min-height: 90px; gap: 14px; }.brand { font-size: 14px; gap: 8px; }.brand small { font-size: 6px; letter-spacing: 1px; }.mark { width: 30px; height: 36px; }.mark i { inset: 2px 5px; }.mark:after { left: 10px; }
+  .wallet { align-items: flex-end; flex-direction: column; gap: 9px; }.network { font-size: 8px; }.secondary { padding: 9px 11px; font-size: 10px; }.secondary span { padding-left: 5px; }
   .workspace { grid-template-columns: 1fr; gap: 28px; padding: 34px 0; max-width: 560px; margin: auto; }.eyebrow { font-size: 8px; letter-spacing: 1.3px; }h1 { font-size: 54px; letter-spacing: -2.8px; margin-top: 23px; }.intro > p { font-size: 12px; }.heroVisual { margin-top: 4px; margin-bottom: -5px; aspect-ratio: 1.68; margin-right: -12px; }.imageCaption { font-size: 7px; right: 10px; }
   .marketCard { padding: 16px; margin-top: 8px; }.marketNumbers > strong { font-size: 28px; }.marketSource { font-size: 9px; }.marketDisclaimer { font-size: 9px; }.feedState { font-size: 7px; letter-spacing: .3px; }
   .trade { padding: 20px; }.tradeHeading { margin-bottom: 22px; }.tradeHeading h2 { font-size: 25px; }.tabs button { padding: 10px 5px; }.tokenBox { padding: 15px; }.amountRow input,.amountRow output { font-size: 28px; }.slippage { gap: 8px; }.slippage button { padding: 6px 8px; }

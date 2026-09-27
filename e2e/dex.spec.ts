@@ -44,7 +44,7 @@ test('mobile layout and invalid input',async({page})=>{
  await page.getByLabel('You pay').fill('-1');await expect(page.getByRole('button',{name:'Swap ↗',exact:true})).toBeDisabled();
  for(const width of [390,360,320]){
   await page.setViewportSize({width,height:844});
-  const dimensions=await page.evaluate(()=>({content:document.documentElement.scrollWidth,viewport:innerWidth,overflow:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth).map(e=>({tag:e.tagName,className:e.className,right:e.getBoundingClientRect().right}))}));
+  const dimensions=await page.evaluate(()=>({content:document.documentElement.scrollWidth,viewport:innerWidth,overflow:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth).map(e=>({tag:e.tagName,className:e.className,text:e.textContent?.slice(0,100),parent:e.parentElement?.className,right:e.getBoundingClientRect().right}))}));
   expect(dimensions.content,`Page overflows at ${width}px: ${JSON.stringify(dimensions.overflow)}`).toBeLessThanOrEqual(dimensions.viewport);
  }
 });
