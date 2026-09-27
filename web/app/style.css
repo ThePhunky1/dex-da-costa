@@ -42,7 +42,7 @@ header { min-height: 108px; display: flex; justify-content: space-between; align
 h1 { font-size: clamp(44px,5.2vw,72px); font-weight: 400; letter-spacing: -3.7px; line-height: 1.04; margin: 28px 0 19px; }
 h1 span { color: var(--accent); }
 .intro > p { font-size: 14px; color: #a9b9b7; line-height: 1.75; margin: 0; }
-.heroVisual { position: relative; margin: 14px -26px -6px -8px; aspect-ratio: 1.65; }
+.heroVisual { overflow: clip; position: relative; margin: 14px -26px -6px -8px; aspect-ratio: 1.65; }
 .heroCharacter { position: absolute; width: 95%; height: 100%; object-fit: contain; object-position: 50% 50%; z-index: 1; filter: drop-shadow(0 8px 30px #0008); mask-image: linear-gradient(to bottom, #000 84%, transparent 100%); }
 .orbitArtwork { position: absolute; inset: 0 -6px; opacity: .45; transform: rotate(5deg); }
 .orbitArtwork svg { width: 100%; height: 100%; }

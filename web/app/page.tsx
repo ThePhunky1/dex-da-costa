@@ -136,7 +136,7 @@ export default function Home(){
     <p className="hint centered">{tab==='swap'&&hypeIn||tab==='add'?'0.001 HYPE reserved for gas. ':''}Transactions expire after 20 minutes.</p>
     {approvalAmount>0n&&allowance.isError&&<p role="alert" className="error">Could not read your allowance. Please retry.</p>}
     {(error||pool.error||switchError)&&<p role="alert" className="error">{error||errorText(pool.error||switchError)}</p>}
-    {status&&<p role="status" className="status">{status}</p>}
+    {status&&<p role="status" aria-label="Transaction status" className="status">{status}</p>}
     {hash&&!localDemo&&<a className="transaction" href={`${explorer}/transaction/${hash}`} target="_blank" rel="noreferrer">View transaction ↗</a>}
     {hash&&localDemo&&<p className="hint">Transaction: {short(hash)}</p>}
    </section>
