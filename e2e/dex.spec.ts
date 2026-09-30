@@ -48,3 +48,46 @@ test('mobile layout and invalid input',async({page})=>{
   expect(dimensions.content,`Page overflows at ${width}px: ${JSON.stringify(dimensions.overflow)}`).toBeLessThanOrEqual(dimensions.viewport);
  }
 });
+
+test('new token markets: native swaps, dual approvals, first pool creation and ERC20 swaps',async({page})=>{
+ test.setTimeout(150000);
+ await page.goto('/');await page.getByRole('button',{name:'Connect wallet',exact:true}).click();
+ await page.getByRole('dialog').getByRole('button',{name:'Browser wallet Detected'}).click();
+ await expect(page.getByRole('dialog')).not.toBeVisible();
+ const status=page.getByRole('status',{name:'Transaction status',exact:true});
+ async function confirm(label:string,approval=false){
+  await page.getByRole('button',{name:label,exact:true}).click();
+  await expect(status).toContainText(approval?'Approval confirmed':'Transaction confirmed',{timeout:20000});
+ }
+ await page.getByLabel('Trading pair').selectOption('HYPE-PURR');
+ await page.getByLabel('You pay').fill('0.1');
+ await expect(page.locator('output')).not.toHaveText('0.00');
+ await confirm('Swap ↗');
+ await page.getByLabel('Reverse swap direction').click();await page.getByLabel('You pay').fill('1');
+ await confirm('Approve PURR ↗',true);await confirm('Swap ↗');
+ await page.getByLabel('Trading pair').selectOption('USDC-PURR');
+ await expect(page.getByLabel('You pay')).toHaveValue('');
+ await expect(page.getByText('This pool is empty. Add the first liquidity to enable swaps.')).toBeVisible();
+ await page.getByRole('button',{name:'Add liquidity',exact:true}).click();
+ await page.getByLabel('Maximum USDC').fill('100');await page.getByLabel('Maximum PURR').fill('200');
+ await expect(page.getByRole('button',{name:'Approve USDC ↗',exact:true})).toBeDisabled();
+ await page.getByRole('checkbox',{name:/I understand this first deposit/}).check();
+ await confirm('Approve USDC ↗',true);await confirm('Approve PURR ↗',true);await confirm('Add liquidity ↗');
+ await expect(page.getByText('POOL CONNECTED',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Swap',exact:true}).click();await page.getByLabel('You pay').fill('1');
+ await confirm('Approve USDC ↗',true);await confirm('Swap ↗');
+ await page.getByLabel('Reverse swap direction').click();await page.getByLabel('You pay').fill('1');
+ await confirm('Approve PURR ↗',true);await confirm('Swap ↗');
+ await page.getByRole('button',{name:'Remove',exact:true}).click();
+ await confirm('Approve LP tokens ↗',true);await confirm('Remove liquidity ↗');
+ await page.getByRole('button',{name:'Add liquidity',exact:true}).click();
+ await page.getByLabel('Maximum PURR').fill('2');
+ await expect(page.getByLabel('Maximum USDC')).not.toHaveValue('');
+ await page.getByLabel('Trading pair').selectOption('HYPE-KNTQ');
+ await expect(page.getByText(/contract reports MTWOZ/)).toBeVisible();
+ await expect(page.locator('.trade .primary')).toBeDisabled();
+ await expect(page.getByLabel('Maximum HYPE')).toHaveValue('');
+ await expect(page.getByLabel('Maximum KNTQ')).toHaveValue('');
+ await page.setViewportSize({width:320,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});

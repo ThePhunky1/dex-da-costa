@@ -1,0 +1,62 @@
+{
+  "checkedAt": "2026-09-30T01:40:50.475Z",
+  "chainId": 99801,
+  "blockNumber": "1057685",
+  "results": [
+    {
+      "symbol": "PURR",
+      "address": "0x5688c9Ca58435Ee982c16cCBE05eAC6993e32Bdd",
+      "parent": "0xa9056c15938f9aff34CD497c722Ce33dB0C2fD57",
+      "enabled": true,
+      "verified": true,
+      "metadata": {
+        "name": "PURR",
+        "symbol": "PURR",
+        "decimals": 18,
+        "parent": "0xa9056c15938f9aff34CD497c722Ce33dB0C2fD57"
+      }
+    },
+    {
+      "symbol": "kHYPE",
+      "address": "0xd63d373D3a529fA935C2e3B470dbB394B0EDb56f",
+      "parent": "0xc8BB404F66D5853565f739Fa17534D455b845894",
+      "enabled": false,
+      "verified": false,
+      "metadata": null
+    },
+    {
+      "symbol": "kmHYPE",
+      "address": "0x5218bE476C6197934A0aA89c39698d12058fe230",
+      "parent": "0x3fDc8Ab0c6a3BA4D29d7009e1b51720E0B60E2e6",
+      "enabled": true,
+      "verified": true,
+      "metadata": {
+        "name": "kMarkets LST",
+        "symbol": "kmHYPE",
+        "decimals": 18,
+        "parent": "0x3fDc8Ab0c6a3BA4D29d7009e1b51720E0B60E2e6"
+      }
+    },
+    {
+      "symbol": "KNTQ",
+      "address": "0xDb3d47D1C7aB037e1250d0b70EF077996af6f2ff",
+      "parent": "0xF92f59fa223A0c7B8D06c5181e6B1c7961d40Cb2",
+      "enabled": false,
+      "verified": false,
+      "metadata": {
+        "name": "MockTwoZero",
+        "symbol": "MTWOZ",
+        "decimals": 18,
+        "parent": "0xF92f59fa223A0c7B8D06c5181e6B1c7961d40Cb2"
+      }
+    },
+    {
+      "symbol": "sKNTQ",
+      "address": "0xE51A294DD40D5887678A694F70C5C547788A8Add",
+      "parent": "0xFE09176D7615fd49b6b1Eeb538d0a8D2eb84d218",
+      "enabled": false,
+      "verified": false,
+      "metadata": null
+    }
+  ]
+}

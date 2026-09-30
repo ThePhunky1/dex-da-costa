@@ -111,3 +111,9 @@ This integration is testnet-only and has not had an independent security audit. 
 The market card uses Hyperliquid’s public mainnet HYPE/USDC spot API. It is an informational midpoint, not an execution oracle. Swap output is calculated from this testnet pool’s reserves and 0.30% fee; the first liquidity deposit establishes its starting price. The API is cached briefly and unavailable/stale data is hidden. Testnet assets do not inherit mainnet value.
 
 See [hosting instructions](docs/HOSTING.md) for GitHub and Vercel publication, and [artwork provenance](docs/ARTWORK.md).
+
+## Additional testnet markets
+
+Select a **Trading pair** to use PURR or kmHYPE against HYPE or USDC, including exact-amount approvals, swaps and liquidity controls. kHYPE, KNTQ and sKNTQ are visible but disabled pending contract verification. See [token evidence and pool-seeding instructions](docs/TOKENS.md). The existing V2 contracts support these direct pairs without redeployment. New pools remain empty until a user seeds them; no multi-hop routing is provided.
+
+The local demo also deploys a mock 18-decimal PURR, seeds HYPE/PURR and leaves USDC/PURR uncreated for the integration test. Generated `NEXT_PUBLIC_LOCAL_PURR_ADDRESS` is local-only, like the other demo settings.

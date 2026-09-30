@@ -20,3 +20,5 @@ Brand marks remain the property of their respective owners and are not covered b
 ## Wallet logos
 
 `web/public/wallets/phantom.svg` is the unmodified Phantom ghost favicon from the official Phantom documentation site (https://docs.phantom.com), retrieved 2026-09-26: https://mintcdn.com/phantom-e50e2e68/tU9g5MXFXgx4l6Em/favicon.svg?fit=max. The mark remains Phantom’s property and is excluded from this project’s GPL license. Other wallet icons are supplied by their installed providers through EIP-6963.
+
+PURR, kHYPE, kmHYPE, KNTQ, and sKNTQ icons are unmodified SVGs from `https://elysium.kinetiq.xyz/icons/{purr,khype,kmhype,kntq,skntq}.svg`, retrieved 2026-09-29. These brand marks belong to their respective owners, are excluded from this project's GPL license, and identify testnet assets without implying endorsement.
