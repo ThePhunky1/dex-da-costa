@@ -16,7 +16,7 @@ export function applyFeeLogs(original:FeeLedger,logs:Log[]):FeeLedger{
    if(from===zeroAddress)s.supply=String(BigInt(s.supply)+value);
    else {const balance=BigInt(s.balances[from]??'0')-value;if(balance<0n)throw Error('Incomplete LP ownership history');s.balances[from]=String(balance);}
    // V2 permanently locks the initial minimum liquidity at address zero.
-   if(to===zeroAddress&&from!==zeroAddress)s.supply=String(BigInt(s.supply)-value);
+   if(to===zeroAddress&&from===l.address?.toLowerCase())s.supply=String(BigInt(s.supply)-value);
    else s.balances[to]=String(BigInt(s.balances[to]??'0')+value);
   }else{
    const inputs=[e.args.amount0In,e.args.amount1In];const supply=BigInt(s.supply);
