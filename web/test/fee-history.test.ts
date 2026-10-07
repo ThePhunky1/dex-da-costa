@@ -4,8 +4,8 @@ import {applyFeeLogs,emptyLedger,feeEvents} from '../lib/fee-history';
 const alice='0x1111111111111111111111111111111111111111',bob='0x2222222222222222222222222222222222222222';
 const pair='0x3333333333333333333333333333333333333333';
 let index=0;
-function transfer(from:string,to:string,value:bigint){return {address:pair,blockNumber:1n,logIndex:index++,topics:encodeEventTopics({abi:feeEvents,eventName:'Transfer',args:{from:from as `0x${string}`,to:to as `0x${string}`}}),data:encodeAbiParameters(parseAbiParameters('uint256'),[value])} as Log;}
-function swap(a:bigint,b:bigint){return {address:pair,blockNumber:1n,logIndex:index++,topics:encodeEventTopics({abi:feeEvents,eventName:'Swap',args:{sender:alice,to:alice}}),data:encodeAbiParameters(parseAbiParameters('uint256,uint256,uint256,uint256'),[a,b,0n,0n])} as Log;}
+function transfer(from:string,to:string,value:bigint){return {address:pair,blockHash:null,transactionHash:null,transactionIndex:0,removed:false,blockNumber:1n,logIndex:index++,topics:encodeEventTopics({abi:feeEvents,eventName:'Transfer',args:{from:from as `0x${string}`,to:to as `0x${string}`}}),data:encodeAbiParameters(parseAbiParameters('uint256'),[value])} as Log;}
+function swap(a:bigint,b:bigint){return {address:pair,blockHash:null,transactionHash:null,transactionIndex:0,removed:false,blockNumber:1n,logIndex:index++,topics:encodeEventTopics({abi:feeEvents,eventName:'Swap',args:{sender:alice,to:alice}}),data:encodeAbiParameters(parseAbiParameters('uint256,uint256,uint256,uint256'),[a,b,0n,0n])} as Log;}
 test('fees follow ownership at each swap, not the current wallet share',()=>{
  const s=applyFeeLogs(emptyLedger(),[transfer(zeroAddress,alice,100n),swap(1000n,0n),transfer(alice,bob,50n),swap(0n,2000n),transfer(bob,pair,50n),transfer(pair,zeroAddress,50n),swap(1000n,0n)]);
  assert.deepEqual(s.fees,['6000','6000']);assert.deepEqual(s.earned[alice],['6000','3000']);assert.deepEqual(s.earned[bob],['0','3000']);assert.equal(s.supply,'50');assert.equal(s.swaps,3);
