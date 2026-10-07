@@ -32,7 +32,8 @@ test('local wallet swaps both ways and adds/removes liquidity',async({page})=>{
  await page.getByLabel('Maximum HYPE').fill('0.1');await page.getByLabel('Maximum USDC').fill('2');
  await page.getByRole('button',{name:'Approve USDC'}).click();await expect(page.getByRole('status',{name:'Transaction status',exact:true})).toContainText('Approval confirmed',{timeout:20000});
  await page.getByRole('button',{name:'Add liquidity ↗',exact:true}).click();await expect(page.getByRole('status',{name:'Transaction status',exact:true})).toContainText('Transaction confirmed',{timeout:20000});
- await page.getByRole('button',{name:'Remove',exact:true}).click();
+ await page.getByRole('button',{name:'Manage withdrawal',exact:true}).click();
+ await expect(page.getByText('Withdrawals include accrued swap fees and reduce your LP position. There is no separate fee claim.')).toBeVisible();
  await page.getByRole('button',{name:'Approve LP tokens'}).click();await expect(page.getByRole('status',{name:'Transaction status',exact:true})).toContainText('Approval confirmed',{timeout:20000});
  await page.getByRole('button',{name:'Remove liquidity ↗',exact:true}).click();await expect(page.getByRole('status',{name:'Transaction status',exact:true})).toContainText('Transaction confirmed',{timeout:20000});
  await expect(page.locator('.error')).toHaveCount(0);
