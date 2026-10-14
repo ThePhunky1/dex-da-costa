@@ -6,6 +6,7 @@ test.beforeEach(async({page})=>{
   if(location.hostname!=='127.0.0.1')return;
   const listeners:Record<string,((...args:unknown[])=>void)[]>={};
   const ethereum={isMetaMask:true,on:(event:string,fn:(...args:unknown[])=>void)=>{(listeners[event]??=[]).push(fn);},removeListener:()=>{},request:async({method,params}:{method:string,params?:unknown[]})=>{
+   if(method==='eth_sendTransaction')(window as unknown as {lastSent:unknown}).lastSent=params?.[0];
    if(method==='wallet_switchEthereumChain')return null;
    if(method==='wallet_requestPermissions')return [{parentCapability:'eth_accounts'}];
    const result=await fetch('http://127.0.0.1:8545',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:method==='eth_requestAccounts'?'eth_accounts':method,params:params??[]})}).then(r=>r.json());
@@ -23,6 +24,8 @@ test('local wallet swaps both ways and adds/removes liquidity',async({page})=>{
  await page.getByLabel('You pay').fill('0.1');
  await page.getByRole('button',{name:'Swap ↗',exact:true}).click();
  await expect(page.getByRole('status',{name:'Transaction status',exact:true})).toContainText('Transaction confirmed',{timeout:20000});
+ const sent=await page.evaluate(()=>(window as unknown as {lastSent:{maxFeePerGas:string;maxPriorityFeePerGas:string}}).lastSent);
+ expect(BigInt(sent.maxFeePerGas)).toBeGreaterThan(0n);expect(BigInt(sent.maxPriorityFeePerGas)).toBeGreaterThanOrEqual(0n);
  await page.getByLabel('Reverse swap direction').click();await page.getByLabel('You pay').fill('1');
  await page.getByRole('button',{name:'Approve USDC'}).click();
  await expect(page.getByRole('status',{name:'Transaction status',exact:true})).toContainText('Approval confirmed',{timeout:20000});
@@ -91,4 +94,15 @@ test('new token markets: native swaps, dual approvals, first pool creation and E
  await expect(page.getByLabel('Maximum KNTQ')).toHaveValue('');
  await page.setViewportSize({width:320,height:844});
  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});
+
+test('last-known reference is visibly stale and expires instead of posing as live',async({page})=>{
+ let fetchedAt=Date.now()-120000;
+ await page.route('**/api/market-price',route=>route.fulfill({json:{price:81.6,change24h:null,fetchedAt,stale:true,source:'Hyperliquid spot',pair:'HYPE/USDC',network:'mainnet'}}));
+ await page.goto('/');await expect(page.getByText('LAST KNOWN',{exact:true})).toBeVisible();
+ await expect(page.locator('.marketNumbers')).toContainText('81.60');
+ await expect(page.locator('.marketDisclaimer')).toContainText('not a live quote');
+ fetchedAt=Date.now()-601000;await page.reload();
+ await expect(page.getByText('UNAVAILABLE',{exact:true})).toBeVisible();
+ await expect(page.locator('.marketNumbers')).not.toContainText('81.60');
 });

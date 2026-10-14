@@ -8,7 +8,7 @@ import { elysium, explorer, localDemo, routerAddress } from '../lib/config';
 import { routerAbi } from '../lib/abi';
 import { amount, display, impactBps, liquidityAmounts, minimum, quote } from '../lib/math';
 import { readPool } from '../lib/pool';
-import { isFreshMarketPrice, type MarketPrice } from '../lib/market-price';
+import { isFreshMarketPrice, isDisplayableMarketPrice, type MarketPrice } from '../lib/market-price';
 import { pairedLiquidityInput } from '../lib/liquidity-input';
 import {markets} from '../lib/tokens';
 import {matchAmount} from '../lib/pair-input';
@@ -18,8 +18,9 @@ import { BalanceButtons } from './balance-buttons';
 import { gasReserve } from '../lib/balance-fill';
 import { Orbit } from './orbit';
 import { FeePanel } from './fee-panel';
+import { bufferedFees, transactionError } from '../lib/transaction-feedback';
 function TokenIcon({symbol}:{symbol:string}){return <Image className="tokenIcon" src={`/tokens/${symbol.toLowerCase()}.svg`} width={32} height={32} alt="" aria-hidden="true"/>;}
-function errorText(error:unknown){return error instanceof Error?error.message.split('\n')[0]:'The transaction could not be completed.';}
+const errorText=transactionError;
 function short(address:string){return `${address.slice(0,6)}…${address.slice(-4)}`;}
 export default function Home(){
  const [mounted,setMounted]=useState(false);
@@ -43,6 +44,7 @@ export default function Home(){
   if(!response.ok)throw Error('Reference unavailable');return response.json();
  },refetchInterval:30000,retry:1});
  const reference=!market.isError&&isFreshMarketPrice(market.data,now)?market.data:undefined;
+ const displayedReference=isDisplayableMarketPrice(market.data,now)?market.data:undefined;
  const p=pool.data;const empty=p?.supply===0n;
  const [manualA,setManualA]=useState('');const [manualB,setManualB]=useState('');
  const referencePair=marketId==='HYPE-USDC';
@@ -91,9 +93,12 @@ export default function Home(){
     name=plan.name;args=plan.args;value=plan.value;
    }
    setStatus('Checking transaction…');
-   const {request}=await client.simulateContract({account:address,address:target,abi,functionName:name,args,value});
+   await client.simulateContract({account:address,address:target,abi,functionName:name,args,value});
    setStatus(needsApproval?'Approve the exact amount in your wallet.':'Review the transaction in your wallet.');
-   const tx=await wallet.writeContract({...request,chain:elysium,account:address});setHash(tx);setStatus('Transaction submitted. Waiting for confirmation…');
+   const [feeBlock,estimatedFees]=await Promise.all([client.getBlock(),client.estimateFeesPerGas()]);
+   if(Date.now()/1000-Number(feeBlock.timestamp)>120)throw Error('Network fee data is stale. Please retry.');
+   const fees=bufferedFees(feeBlock.baseFeePerGas,estimatedFees);
+   const tx=await wallet.writeContract({address:target,abi,functionName:name,args,value,...fees,chain:elysium,account:address});setHash(tx);setStatus('Transaction submitted. Waiting for confirmation…');
    const receipt=await client.waitForTransactionReceipt({hash:tx});
    if(receipt.status!=='success')throw Error('Transaction reverted. Your trade was not executed.');
    setStatus(needsApproval?'Approval confirmed. Review the amounts, then continue.':'Transaction confirmed. Balances updated.');
@@ -115,10 +120,10 @@ export default function Home(){
     <p>More tokens. Open liquidity.<br/>Trade Elysium testnet assets against HYPE and USDC.</p>
     <div className="heroVisual"><Orbit/><Image className="heroCharacter" src="/artwork/agent-k-kinetiq.png" width={1466} height={1073} sizes="(max-width: 760px) 92vw, 540px" priority alt="Agent K wearing mirrored sunglasses and a mechanical exoskeleton, with the Kinetiq wordmark on his science-fiction weapon."/><span className="imageCaption">DA COSTA / OPEN ACCESS</span></div>
     <div className="marketCard">
-     <div className="marketLabel"><TokenIcon symbol="HYPE"/><div><strong>HYPE <span>/ USDC</span></strong><small>MAINNET SPOT REFERENCE</small></div><span className="feedState"><i className={reference?'':'offline'}/>{reference?'LIVE FEED':market.isPending?'CONNECTING':'UNAVAILABLE'}</span></div>
-     <div className="marketNumbers"><strong>{reference?reference.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}):'—'}<small> USDC</small></strong><span className={reference?.change24h!==null&&reference?.change24h!==undefined?(reference.change24h>=0?'positive':'negative'):''}>{reference?.change24h!==null&&reference?.change24h!==undefined?`${reference.change24h>=0?'+':''}${reference.change24h.toFixed(2)}%`:'—'}<small>24H</small></span></div>
-     <div className="marketSource"><a href="https://app.hyperliquid.xyz/trade/HYPE/USDC" target="_blank" rel="noreferrer">Hyperliquid spot ↗</a><span>{reference?`Fetched ${new Date(reference.fetchedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`:'Reference feed unavailable'}</span></div>
-     <p className="marketDisclaimer">For context only. Your swap price comes from this testnet pool.</p>
+     <div className="marketLabel"><TokenIcon symbol="HYPE"/><div><strong>HYPE <span>/ USDC</span></strong><small>MAINNET SPOT REFERENCE</small></div><span className="feedState"><i className={reference?'':'offline'}/>{reference?'LIVE FEED':displayedReference?'LAST KNOWN':market.isPending?'CONNECTING':'UNAVAILABLE'}</span></div>
+     <div className="marketNumbers"><strong>{displayedReference?displayedReference.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4}):'—'}<small> USDC</small></strong><span className={displayedReference?.change24h!==null&&displayedReference?.change24h!==undefined?(displayedReference.change24h>=0?'positive':'negative'):''}>{displayedReference?.change24h!==null&&displayedReference?.change24h!==undefined?`${displayedReference.change24h>=0?'+':''}${displayedReference.change24h.toFixed(2)}%`:'—'}<small>24H</small></span></div>
+     <div className="marketSource"><a href="https://app.hyperliquid.xyz/trade/HYPE/USDC" target="_blank" rel="noreferrer">Hyperliquid spot ↗</a><span>{displayedReference?`Fetched ${new Date(displayedReference.fetchedAt).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`:'Reference feed unavailable'}</span></div>
+     <p className="marketDisclaimer">For context only. Your swap price comes from this testnet pool.{displayedReference&&!reference?' Refresh delayed; showing the last known price, not a live quote.':''}</p>
     </div>
    </section>
    <section className="trade" id="exchange" aria-label="Exchange"><div className="tradeHeading"><div><span className="eyebrow">THE EXCHANGE</span><h2>Make your move.</h2></div><span className="tradeNumber" aria-hidden="true">01 /</span></div>

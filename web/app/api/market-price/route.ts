@@ -8,7 +8,7 @@ export async function GET() {
       headers: { 'Cache-Control': 'public, max-age=0, s-maxage=15' },
     });
   } catch {
-    // No made-up price and no stale success response on a failed upstream request.
+    // The loader labels bounded last-known data. Beyond that window, fail explicitly.
     return Response.json({ error: 'Market reference temporarily unavailable' }, {
       status: 503, headers: { 'Cache-Control': 'no-store' },
     });

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HYPE_TOKEN_ID, USDC_TOKEN_ID, parseMarketPrice, isFreshMarketPrice, createMarketPriceLoader } from '../lib/market-price';
+import { HYPE_TOKEN_ID, USDC_TOKEN_ID, parseMarketPrice, isFreshMarketPrice, isDisplayableMarketPrice, createMarketPriceLoader } from '../lib/market-price';
 function fixture() {
   return [{ tokens: [{ name: 'HYPE', index: 150, tokenId: HYPE_TOKEN_ID }, { name: 'USDC', index: 0, tokenId: USDC_TOKEN_ID }],
     universe: [{ name: '@107', index: 107, tokens: [150, 0] }] },
@@ -28,7 +28,7 @@ test('expires reference data and rejects future timestamps', () => {
   assert.equal(isFreshMarketPrice(result, 91001), false);
   assert.equal(isFreshMarketPrice({ ...result, fetchedAt: 100000 }, 1000), false);
 });
-test('coalesces requests, caches briefly, and fails closed after expiry', async () => {
+test('coalesces requests, retries, labels cached prices and expires them', async () => {
   let calls = 0, time = 1000, fail = false;
   const get = createMarketPriceLoader(async () => {
     calls++;
@@ -36,6 +36,16 @@ test('coalesces requests, caches briefly, and fails closed after expiry', async 
   }, () => time);
   const [a, b] = await Promise.all([get(), get()]);
   assert.equal(calls, 1); assert.deepEqual(a, b); await get(); assert.equal(calls, 1);
-  time += 31000; fail = true; await assert.rejects(get()); assert.equal(calls, 2);
-  fail = false; assert.equal((await get()).fetchedAt, time); assert.equal(calls, 3);
+  time += 31000; fail = true; const stale=await get(); assert.equal(stale.stale,true); assert.equal(stale.fetchedAt,1000); assert.equal(isFreshMarketPrice(stale,time),false); assert.equal(isDisplayableMarketPrice(stale,time),true); assert.equal(calls,3);
+  time=601001; await assert.rejects(get()); assert.equal(isDisplayableMarketPrice(stale,time),false);
+  fail = false; const recovered=await get(); assert.equal(recovered.fetchedAt,time); assert.equal(recovered.stale,undefined);
+});
+
+test('a transient source error retries successfully without inventing a price',async()=>{
+ let calls=0;const get=createMarketPriceLoader(async()=>++calls===1?new Response('',{status:503}):new Response(JSON.stringify(fixture())),()=>1000);
+ assert.equal((await get()).price,50);assert.equal(calls,2);
+});
+test('cold-start failures have no fallback and future timestamps cannot be displayed',async()=>{
+ const get=createMarketPriceLoader(async()=>{throw Error('offline');});await assert.rejects(get());
+ assert.equal(isDisplayableMarketPrice(parseMarketPrice(fixture(),100000),1000),false);
 });

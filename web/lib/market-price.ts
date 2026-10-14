@@ -3,6 +3,7 @@ export const HYPE_TOKEN_ID = '0x0d01dc56dcaaca66ad901c959b4011ec';
 export const USDC_TOKEN_ID = '0x6d1e7cde53ba9467b783cb7c530ce054';
 export type MarketPrice = {
   price: number;
+  stale?: boolean;
   change24h: number | null;
   fetchedAt: number;
   source: 'Hyperliquid spot';
@@ -39,7 +40,10 @@ export function parseMarketPrice(payload: unknown, fetchedAt: number): MarketPri
   return { price, change24h: Number.isFinite(change24h) ? change24h : null, fetchedAt, source: 'Hyperliquid spot', pair: 'HYPE/USDC', network: 'mainnet' };
 }
 export function isFreshMarketPrice(data: MarketPrice | undefined, now = Date.now()): data is MarketPrice {
-  return !!data && Number.isFinite(data.price) && data.price > 0 && Number.isFinite(data.fetchedAt) && data.fetchedAt <= now + 5000 && now - data.fetchedAt <= 90000;
+  return !!data && !data.stale && Number.isFinite(data.price) && data.price > 0 && Number.isFinite(data.fetchedAt) && data.fetchedAt <= now + 5000 && now - data.fetchedAt <= 90000;
+}
+export function isDisplayableMarketPrice(data: MarketPrice | undefined, now = Date.now()): data is MarketPrice {
+  return !!data && Number.isFinite(data.price) && data.price > 0 && Number.isFinite(data.fetchedAt) && data.fetchedAt <= now + 5000 && now - data.fetchedAt <= 600000;
 }
 export function createMarketPriceLoader(fetcher: typeof fetch = fetch, now: () => number = Date.now) {
   let cached: MarketPrice | undefined;
@@ -48,14 +52,21 @@ export function createMarketPriceLoader(fetcher: typeof fetch = fetch, now: () =
     if (cached && now() - cached.fetchedAt < 30000) return cached;
     if (inflight) return inflight;
     inflight = (async () => {
+      let failure:unknown;
+      for(let attempt=0;attempt<2;attempt++){
+       try {
       const response = await fetcher('https://api.hyperliquid.xyz/info', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'spotMetaAndAssetCtxs' }),
-        cache: 'no-store', signal: AbortSignal.timeout(5000),
+        cache: 'no-store', signal: AbortSignal.timeout(2500),
       });
       if (!response.ok) throw Error('Market source unavailable');
       cached = parseMarketPrice(await response.json(), now());
       return cached;
+       }catch(error){failure=error;}
+      }
+      if(isDisplayableMarketPrice(cached,now()))return {...cached,stale:true};
+      throw failure;
     })();
     try { return await inflight; } finally { inflight = undefined; }
   };
