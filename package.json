@@ -15,7 +15,8 @@
     "verify:network": "node scripts/verify-network.mjs",
     "demo:seed": "node scripts/local-demo.mjs",
     "test:e2e": "playwright test",
-    "verify:deployment": "node scripts/verify-deployment.mjs"
+    "verify:deployment": "node scripts/verify-deployment.mjs",
+    "test:oxley": "playwright test --config playwright.oxley.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",
@@ -30,9 +31,11 @@
   },
   "overrides": {
     "tmp": "0.2.7",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "viem": "$viem"
   },
   "engines": {
     "node": ">=20.9.0"
-  }
+  },
+  "type": "module"
 }

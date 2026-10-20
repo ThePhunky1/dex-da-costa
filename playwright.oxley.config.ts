@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./e2e',testMatch:'oxley.spec.ts',workers:1,timeout:60000,use:{baseURL:'http://127.0.0.1:3101',headless:true},webServer:{command:'npm run build && npm run start --workspace web -- --port 3101',env:{NEXT_PUBLIC_LOCAL_DEMO:'false',NEXT_PUBLIC_RPC_URL:'http://127.0.0.1:8556'},url:'http://127.0.0.1:3101',reuseExistingServer:false,timeout:120000}});

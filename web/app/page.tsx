@@ -110,7 +110,7 @@ export default function Home(){
  return <main>
   <header>
    <a className="brand" href="/" aria-label="Dex Da Costa home"><span className="mark" aria-hidden="true"><i/><b/></span><span>DEX <strong>DA COSTA</strong><small>ACCESS IS FOR EVERYONE</small></span></a>
-   <nav className="headerNav" aria-label="Main navigation"><a href="#exchange">Exchange</a><a href="#pool">The pool</a></nav>
+   <nav className="headerNav" aria-label="Main navigation"><a href="#exchange">Exchange</a><a href="#pool">The pool</a><a href="/oxley">Oxley markets</a></nav>
    <div className="wallet"><span className="network"><i/>{localDemo?'Local development':'Elysium testnet'}</span><WalletMenu/></div>
   </header>
   <div className="workspace">

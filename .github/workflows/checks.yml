@@ -30,3 +30,5 @@ jobs:
           done
           npm run demo:seed
           npm run test:e2e
+      - name: Oxley browser integration (simulated RPC and wallet)
+        run: npm run test:oxley

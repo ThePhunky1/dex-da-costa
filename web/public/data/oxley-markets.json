@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-20T00:31:59.173Z",
+  "cursor": {
+    "chainId": 99801,
+    "releaseId": "elysium-auctions-flat-fee-7006d7889ab293d3",
+    "curve": "0x18bf92514c0d749a017aaf69153442703e1a966b",
+    "blockNumber": "11886250",
+    "blockHash": "0x54d0b4651d06a7f0e0f87ae3c63b93f9780b86f516c651ca62b794c20a8cac39"
+  },
+  "items": [
+    {
+      "dealId": "0x3894ebc64e1cedce1561ff29af4cbe5cce404e63b309be08273105b9127bb323",
+      "coin": "0x7286AAc55Cc494554c285374635A61979086aF00",
+      "name": "Mayhem QA",
+      "symbol": "MAYHEM",
+      "status": "active"
+    },
+    {
+      "dealId": "0x197d211baac07224270381bf62b74e53e40858ea07aa2ce94186bbaa3f926385",
+      "coin": "0xe1C9e79db41C863D7837f41D34bb8B03DDCf4Ad7",
+      "name": "GNX QA",
+      "symbol": "GNX",
+      "status": "active"
+    },
+    {
+      "dealId": "0xd208f3000d614812e2e0c4e9cfd77c3f5b671bce39c90485492fa675a4b33af3",
+      "coin": "0x48aC6EB4423a79eD40a72987f8E78BBb6e471C2B",
+      "name": "Eusexua QA",
+      "symbol": "EUSEXUA",
+      "status": "active"
+    },
+    {
+      "dealId": "0xf617ec9bc655fb5ba0129ab123eb977d0c89382821b9e9c5f801b371f403f4f6",
+      "coin": "0x90F7F62FF88D38C7D2373CA2E1ec31Ba6f790762",
+      "name": "Iron Man",
+      "symbol": "IRON",
+      "status": "active"
+    },
+    {
+      "dealId": "0xb2265b6af658f29a6b6366b0bda16579cd29129b0fb2fcfa07fffaffa1552c52",
+      "coin": "0xb6e83ab4346AB11481631a6C04dc0Af5A42282F3",
+      "name": "RGB",
+      "symbol": "RAINBOW",
+      "status": "active"
+    },
+    {
+      "dealId": "0xaa7adad4f30dba1e08f9004ac0cb5134d96b8583cc0c2c111db17063ede8f0c6",
+      "coin": "0xBE8CD10ea1547Be078accE1dc9b8b52aaC547f2C",
+      "name": "Doom Bunny",
+      "symbol": "DOBUN",
+      "status": "active"
+    }
+  ]
+}
