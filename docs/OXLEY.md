@@ -62,3 +62,7 @@ unknown request automatically. Keep the same browser/storage until reconciled.
 
 Sources: https://oxley.fun/docs/builders and
 https://github.com/greenpeez/oxley-sdk/blob/main/docs/provider-handoff.md
+
+## Token artwork
+
+Launch cards read display-only artwork from Oxley's `/api/elysium/token-images` endpoint through `/api/oxley-images`. Requests contain at most 50 market IDs; returned artwork must match both the market ID and token contract address. Images use Oxley's Pinata IPFS gateway and never supply trading addresses or quotes. Metadata is cached for five minutes. Missing or failed images show the ticker initials, without blocking trading.

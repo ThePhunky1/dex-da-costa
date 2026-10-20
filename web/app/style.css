@@ -172,3 +172,10 @@ footer { margin-top: 25px; padding-top: 22px; border-top: 1px solid #1f3134; dis
 .oxleyTrade p{line-height:1.65}.oxleyAddress{font-family:var(--mono);font-size:11px;overflow-wrap:anywhere}.oxleyTrade dl{display:grid;grid-template-columns:1fr 1fr;gap:16px;line-height:1.6}.oxleyTrade dd{text-align:right;margin:0;overflow-wrap:anywhere}.oxleyTrade .primary{display:block;width:100%;background:var(--accent);color:var(--bg);margin-top:16px}.textLink{text-decoration:underline;text-underline-offset:4px}.oxleyPage [role=alert]{color:#ffb8a6}.oxleyPage .notice{overflow-wrap:anywhere}
 @media(max-width:760px){.oxleyGrid{grid-template-columns:1fr}.oxleyCatalog,.oxleyTrade{padding:20px}.oxleyPage header{flex-wrap:wrap;padding:20px 0}.oxleyPage .headerNav{margin:0;gap:16px}}
 @media(max-width:1050px){header{flex-wrap:wrap;padding:18px 0}.headerNav,.oxleyPage .headerNav{display:flex;order:3;flex-basis:100%;margin:0;gap:22px;flex-wrap:wrap}}
+
+.oxleyMarket{flex-direction:row;align-items:center;gap:14px}
+.oxleyMarketText{display:flex;flex-direction:column;gap:8px;min-width:0}
+.oxleyMarketText strong{color:var(--ink)}
+.oxleyMarket.selected .oxleyMarketText strong{color:var(--accent)}
+.oxleyArtwork{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:50%;overflow:hidden;background:#263c38;border:1px solid var(--line);font-size:15px;font-weight:700}
+.oxleyArtwork img{width:48px;height:48px;object-fit:cover}

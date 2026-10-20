@@ -10,6 +10,8 @@ import {elysium,explorer,localDemo} from '../../lib/config';
 import {amount} from '../../lib/math';
 import {bufferedFees,transactionError} from '../../lib/transaction-feedback';
 import {WalletMenu} from '../wallet-menu';
+import {TokenArtwork} from './token-artwork';
+import {artworkUrl,parseArtwork} from '../../lib/oxley-images';
 import {BalanceButtons} from '../balance-buttons';
 
 export default function OxleyPage(){
@@ -30,6 +32,15 @@ export default function OxleyPage(){
   }));return {items,cursor:page.cursor,hasMore:page.hasMore};
  },getNextPageParam:p=>p.cursor,enabled:!!sdk,retry:false,staleTime:Infinity});
  const allRows=Array.from(new Map((catalog.data?.pages.flatMap(p=>p.items)??snapshot.items).map(x=>[x.dealId,x])).values());
+ const artworkIds=allRows.map(row=>row.dealId.toLowerCase()).sort();
+ const artwork=useQuery({queryKey:['oxley-artwork',artworkIds],queryFn:async()=>{
+  const items=[];
+  for(let i=0;i<artworkIds.length;i+=50){
+   const response=await fetch(`/api/oxley-images?${new URLSearchParams({ids:artworkIds.slice(i,i+50).join(',')})}`,{signal:AbortSignal.timeout(10000)});
+   if(!response.ok)throw Error('Artwork unavailable');
+   items.push(...parseArtwork(await response.json()));
+  }return items;
+ },enabled:!localDemo&&artworkIds.length>0,staleTime:300000,retry:1});
  const rows=allRows.filter(x=>[x.name,x.symbol,x.dealId,x.coin].some(v=>v.toLowerCase().includes(filter.toLowerCase())));
  useEffect(()=>{const pages=catalog.data?.pages;if(!pages||pages.length<2||!pages.at(-1)?.hasMore||catalog.isFetching||catalog.isError)return;const t=setTimeout(()=>void catalog.fetchNextPage(),2000);return()=>clearTimeout(t);},[catalog.data,catalog.isFetching,catalog.isError,catalog.fetchNextPage]);
  const selected=allRows.find(x=>x.dealId===id);
@@ -88,7 +99,7 @@ export default function OxleyPage(){
  {localDemo?<p>Oxley markets are available on Elysium testnet only.</p>:<><label htmlFor="oxley-search">Find a token</label><input id="oxley-search" value={search} maxLength={66} disabled={busy} onChange={e=>setSearch(e.target.value)} placeholder="Name, symbol or market ID"/>
  <p>Onchain market list, initially checked {snapshot.checkedAt.slice(0,10)}. Each market is verified again before quoting.</p>
  {catalog.isFetchingNextPage&&<p role="status">Checking newer activation events…</p>}{catalog.isError&&<p role="alert">Discovery unavailable. The saved list remains visible; retry later. {transactionError(catalog.error)}</p>}
- {rows.map(row=><button key={row.dealId} className={`oxleyMarket ${row.dealId===id?'selected':''}`} disabled={busy||!!pending} onClick={()=>{setId(row.dealId as Hex);setInput('');setError('');setMessage('');}}><strong>{row.symbol.slice(0,32)}</strong><span>{row.name.slice(0,70)}</span><small>{row.status} · {row.coin.slice(0,8)}…{row.coin.slice(-4)}</small></button>)}
+ {rows.map(row=><button key={row.dealId} className={`oxleyMarket ${row.dealId===id?'selected':''}`} disabled={busy||!!pending} onClick={()=>{setId(row.dealId as Hex);setInput('');setError('');setMessage('');}}><TokenArtwork key={artworkUrl(artwork.data??[],row)??row.coin} src={artworkUrl(artwork.data??[],row)} symbol={row.symbol}/><span className="oxleyMarketText"><strong>{row.symbol.slice(0,32)}</strong><span>{row.name.slice(0,70)}</span><small>{row.status} · {row.coin.slice(0,8)}…{row.coin.slice(-4)}</small></span></button>)}
  {!catalog.isPending&&!catalog.isError&&rows.length===0&&<p>No launches found on this page.</p>}
  <button disabled={catalog.isFetching||busy} onClick={()=>void catalog.fetchNextPage()}>Check newer launches</button>
  <p>Checked through block {catalog.data?.pages.at(-1)?.cursor.blockNumber??snapshot.cursor.blockNumber}. {catalog.data?.pages.at(-1)?.hasMore?'More history may remain; check again to continue.':'Caught up to the latest check.'}</p></>}

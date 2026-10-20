@@ -57,7 +57,12 @@ test('Oxley buys and sells with exact approvals, reviewed minimums and mobile la
    const r=await fetch('http://127.0.0.1:8556/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})}).then(r=>r.json());if(r.error)throw r.error;return r.result;
   }};Object.defineProperty(window,'ethereum',{value:provider});
  });
+ const imageCid='bafkreigsu6odw4by3unutdxp4xuo5xr5zirlzl7ni5vgptvuxw7xucftwq';
+ await page.route('**/api/oxley-images?*',route=>route.fulfill({json:{items:[{dealId:snapshot.items[0].dealId,coin,cid:imageCid}]}}));
+ await page.route('https://gateway.pinata.cloud/ipfs/**',route=>route.fulfill({contentType:'image/svg+xml',body:'<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><circle cx="24" cy="24" r="24" fill="#83d5ba"/></svg>'}));
  await page.goto('/oxley');await page.getByRole('button',{name:/MAYHEM/}).click();
+ const artwork=page.getByRole('button',{name:/MAYHEM/}).locator('img');await expect(artwork).toBeVisible();await expect(artwork).toHaveJSProperty('naturalWidth',48);
+ await expect(page.getByRole('button',{name:/GNX/}).locator('.oxleyArtwork')).toHaveText('GN');
  await page.getByRole('button',{name:'Connect wallet',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Browser wallet Detected'}).click();
  await expect(page.getByRole('dialog')).not.toBeVisible();await expect(page.locator('.walletTrigger')).toContainText('0x1111');
  await page.getByLabel('You pay').fill('10');const go=page.getByRole('button',{name:'Continue · approval or swap'});
