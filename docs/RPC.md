@@ -5,11 +5,11 @@ The web app reads through `/api/rpc`. Configure `ALCHEMY_ELYSIUM_API_KEY` as a *
 Alchemy endpoint: https://elysium-testnet.g.alchemy.com/v2/{apiKey}
 Official documentation: https://www.alchemy.com/docs/reference/elysium-api-faq
 
-The proxy tries Alchemy first when configured, then optional `ELYSIUM_FALLBACK_RPC_URLS` (comma-separated trusted HTTPS endpoints), then the official public RPC. At most three endpoints are used. It checks chain ID before forwarding, bounds request time, fails over on infrastructure errors, and returns contract errors without retrying them against another provider. No signing or transaction-submission methods are exposed. Wallet transactions still go through the user's wallet provider; app failover does not change the wallet's own RPC settings.
+The proxy tries Alchemy first when configured, then optional `ELYSIUM_FALLBACK_RPC_URLS` (comma-separated trusted HTTPS endpoints), then the official public RPC. At most three endpoints are used. It checks chain ID before forwarding (sharing successful identity checks for up to 60 seconds), bounds request time, fails over on infrastructure errors, and returns contract errors without retrying them against another provider. No signing or transaction-submission methods are exposed. Wallet transactions still go through the user's wallet provider; app failover does not change the wallet's own RPC settings.
 
 The browser retains a direct public RPC fallback if the web server itself is unavailable. Never place a private key-bearing endpoint in `NEXT_PUBLIC_RPC_URL`: this value is public. Without an Alchemy key or another configured endpoint, the app still relies on the official public node; retries cannot fix an outage of that node.
 
-The API does not cache chain data. Pool reads retain their existing block freshness and metadata checks. Consider provider quotas and Vercel firewall rate limits for public production traffic.
+The API does not cache balances, quotes, blocks or contract results. Pool reads retain their existing block freshness and metadata checks. Consider provider quotas and Vercel firewall rate limits for public production traffic.
 
 # USDC / Oxy-USDC
 

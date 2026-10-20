@@ -26,10 +26,21 @@ test('contract revert does not trigger failover or leak provider messages',async
  assert.equal(count,2);assert.equal(result.error?.code,3);assert.equal(result.error?.data,'0x1234');assert.ok(!JSON.stringify(result).includes('secret'));
 });
 test('all providers down yields a safe actionable error',async()=>{
- const result=await forwardRpc(request,['one'],async()=>{throw Error('API KEY');});
+ const result=await forwardRpc(request,['offline'],async()=>{throw Error('API KEY');});
  assert.equal(result.error?.code,-32002);assert.ok(!JSON.stringify(result).includes('API KEY'));
 });
 test('server endpoint configuration is bounded and HTTPS only',()=>{
  const urls=rpcEndpoints('key','http://wrong,https://backup.example');
  assert.equal(urls.length,3);assert.ok(urls[0].includes('elysium-testnet.g.alchemy.com'));assert.ok(urls.every(x=>x.startsWith('https:')));
+});
+
+test('chain checks are shared while fresh but data is always requested',async()=>{
+ let chains=0,reads=0;
+ const fetcher:typeof fetch=async(_url,options)=>{
+  const body=JSON.parse(String(options?.body));
+  if(body.method==='eth_chainId'){chains++;return response({result:'0x185d9'});}
+  reads++;return response({jsonrpc:'2.0',id:7,result:'0x123'});
+ };
+ await Promise.all([forwardRpc(request,['cached'],fetcher),forwardRpc(request,['cached'],fetcher)]);
+ assert.equal(chains,1);assert.equal(reads,2);
 });
