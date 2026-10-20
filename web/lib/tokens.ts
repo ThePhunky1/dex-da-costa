@@ -12,3 +12,6 @@ export const tokens:Token[]=[
  token('sKNTQ','0xE51A294DD40D5887678A694F70C5C547788A8Add','Awaiting verified token deployment'),
 ];
 export const markets=[{id:'HYPE-USDC',a:tokens[0],b:tokens[1]},...tokens.slice(2).flatMap(t=>[tokens[0],tokens[1]].map(base=>({id:`${base.symbol}-${t.symbol}`,a:base,b:t})))];
+
+const oxyUsdc:Token={symbol:'Oxy-USDC',decimals:6,address:getAddress('0xa4ce6e6c719f7fb524230c367948039b078683e4'),...(localDemo?{unavailable:'Local token not configured'}:{})};
+markets.push({id:'USDC-Oxy-USDC',a:tokens[1],b:oxyUsdc});
