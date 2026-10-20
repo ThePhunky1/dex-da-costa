@@ -19,7 +19,7 @@ export function transactionError(error:unknown):string{
  if(/expired|deadline/.test(text))return 'This transaction quote expired. Refresh the amounts and try again.';
  if(/insufficient_output_amount|excessive_input_amount|insufficient_[ab]_amount/.test(text))return 'The pool price moved beyond your slippage limit. Refresh the quote and review the amounts before retrying.';
  if(/revert/.test(text))return 'The transaction could not be completed, and the wallet or network supplied no usable explanation. Refresh balances and the quote, check your network fee, and retry. If a transaction was submitted, check its explorer status first.';
- if(/timeout|timed out|fetch failed|http request|network.*error/.test(text))return 'The wallet or network did not respond. If you already submitted a transaction, check its explorer status before trying again.';
+ if(/timeout|timed out|fetch failed|http request|rpc request failed|rpc rejected|connections are temporarily unavailable|network.*error/.test(text))return 'The wallet or network did not respond. If you already submitted a transaction, check its explorer status before trying again.';
  const message=error instanceof Error?error.message.split('\n').find(line=>line.trim()):undefined;
  return message&&!/following reason:|execution reverted/i.test(message)?message.slice(0,240):'The transaction could not be completed. Refresh balances and try again; check any submitted transaction in the explorer first.';
 }

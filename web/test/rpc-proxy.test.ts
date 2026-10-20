@@ -5,6 +5,8 @@ const request={jsonrpc:'2.0',id:7,method:'eth_call',params:[]};
 const response=(value:unknown)=>new Response(JSON.stringify(value));
 test('RPC proxy accepts reads but refuses signing, writes and batches',()=>{
  assert.ok(validRpcRequest(request));
+ assert.ok(validRpcRequest({jsonrpc:'2.0',id:1,method:'eth_chainId'}));
+ for(const params of [null,'bad',{}])assert.equal(validRpcRequest({...request,params}),false);
  for(const method of ['eth_sendRawTransaction','eth_sendTransaction','personal_sign','debug_traceTransaction'])assert.equal(validRpcRequest({...request,method}),false);
  assert.equal(validRpcRequest([request]),false);
 });

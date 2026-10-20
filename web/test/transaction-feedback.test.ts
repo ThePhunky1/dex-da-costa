@@ -15,6 +15,7 @@ test('rejection, slippage, timeouts, and empty reverts have actionable explanati
  assert.match(transactionError({cause:{code:4001}}),/cancelled/);
  assert.match(transactionError({details:'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT'}),/slippage/);
  assert.match(transactionError(Error('fetch failed')),/explorer status/);
+ assert.match(transactionError(Error('RPC Request failed.')),/explorer status/);
  assert.match(transactionError(Error('Execution reverted for the following reason:\n')),/no usable explanation/);
  assert.match(transactionError(Error('insufficient funds for gas')),/HYPE/);
 });

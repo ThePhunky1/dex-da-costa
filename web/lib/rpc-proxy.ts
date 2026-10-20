@@ -1,9 +1,9 @@
 export const publicRpc = 'https://testnet-rpc.elysium.kinetiq.xyz';
 const methods = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_getBalance','eth_getCode','eth_getBlockByNumber','eth_getBlockByHash','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getTransactionCount','eth_estimateGas','eth_gasPrice','eth_maxPriorityFeePerGas','eth_feeHistory','eth_getLogs']);
-export function validRpcRequest(value: unknown): value is {jsonrpc:string;id:string|number;method:string;params:unknown[]} {
+export function validRpcRequest(value: unknown): value is {jsonrpc:string;id:string|number;method:string;params?:unknown[]} {
  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
  const r=value as Record<string,unknown>;
- return r.jsonrpc==='2.0' && (typeof r.id==='string'||typeof r.id==='number') && typeof r.method==='string' && methods.has(r.method) && Array.isArray(r.params);
+ return r.jsonrpc==='2.0' && (typeof r.id==='string'||typeof r.id==='number') && typeof r.method==='string' && methods.has(r.method) && (r.params===undefined || Array.isArray(r.params));
 }
 export function rpcEndpoints(key?:string, extra?:string) {
  const urls=[...(key?[`https://elysium-testnet.g.alchemy.com/v2/${encodeURIComponent(key.trim())}`]:[]),...(extra?extra.split(',').map(x=>x.trim()).filter(Boolean):[]),publicRpc];
