@@ -10,7 +10,7 @@ const coin=snapshot.items[0].coin;
 const zero='0x0000000000000000000000000000000000000000';
 const abi=[...curveAbi,...registryAbi,...erc20Abi] as Abi;
 
-test('Oxley buys and sells with exact approvals, reviewed minimums and mobile layout',async({page})=>{
+test('Oxley buys and sells with exact approvals, reviewed minimums and mobile layout',async({page},testInfo)=>{
  const allowance:Record<string,bigint>={};let sent=0;const transactions:any[]=[];let failQuote=false;
  const block={number:'0xbebc20',hash,parentHash:hash,timestamp:`0x${Math.floor(Date.now()/1000).toString(16)}`,nonce:'0x0000000000000000',sha3Uncles:hash,logsBloom:`0x${'0'.repeat(512)}`,transactionsRoot:hash,stateRoot:hash,receiptsRoot:hash,miner:zero,difficulty:'0x0',totalDifficulty:'0x0',extraData:'0x',size:'0x100',gasLimit:'0x1c9c380',gasUsed:'0x10000',baseFeePerGas:'0x5f5e100',transactions:[],uncles:[]};
  await page.route('http://127.0.0.1:8556/**',async route=>{
@@ -60,7 +60,7 @@ test('Oxley buys and sells with exact approvals, reviewed minimums and mobile la
  await page.goto('/oxley');await page.getByRole('button',{name:/MAYHEM/}).click();
  await page.getByRole('button',{name:'Connect wallet',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Browser wallet Detected'}).click();
  await page.getByLabel('You pay').fill('10');const go=page.getByRole('button',{name:'Continue · approval or swap'});
- await expect(go).toBeEnabled();await expect(page.locator('dd').nth(1)).toHaveText('99.5 MAYHEM');await go.click();
+ await expect(go).toBeEnabled();await page.screenshot({path:testInfo.outputPath('oxley-desktop.png'),fullPage:true});await expect(page.locator('dd').nth(1)).toHaveText('99.5 MAYHEM');await go.click();
  await expect(page.getByText('Approval confirmed. Refresh the quote, then continue to swap.')).toBeVisible();
  expect(transactions[0].functionName).toBe('approve');expect(transactions[0].args[1]).toBe(10000000n);
  await go.click();await expect(page.getByText('Swap confirmed.',{exact:true})).toBeVisible();
@@ -69,7 +69,7 @@ test('Oxley buys and sells with exact approvals, reviewed minimums and mobile la
  await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Sell',exact:true}).click();await page.getByLabel('You pay').fill('100');
  await expect(go).toBeEnabled();await go.click();await expect(page.getByText('Approval confirmed. Refresh the quote, then continue to swap.')).toBeVisible();await go.click();
  await expect(page.getByText('Swap confirmed.',{exact:true})).toBeVisible();expect(transactions.at(-1).functionName).toBe('sell');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:testInfo.outputPath('oxley-mobile.png'),fullPage:true});
  failQuote=true;await page.getByLabel('You pay').fill('101');await expect(go).toBeDisabled();await expect(page.getByRole('alert')).toContainText('Quote unavailable');
  await page.getByLabel('You pay').fill('-1');await expect(go).toBeDisabled();
  await page.evaluate(({account})=>localStorage.setItem('dex-oxley-pending-v1',JSON.stringify({account,started:Date.now()})),{account});

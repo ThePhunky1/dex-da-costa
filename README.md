@@ -117,3 +117,11 @@ See [hosting instructions](docs/HOSTING.md) for GitHub and Vercel publication, a
 Select a **Trading pair** to use PURR or kmHYPE against HYPE or USDC, including exact-amount approvals, swaps and liquidity controls. kHYPE, KNTQ and sKNTQ are visible but disabled pending contract verification. See [token evidence and pool-seeding instructions](docs/TOKENS.md). The existing V2 contracts support these direct pairs without redeployment. New pools remain empty until a user seeds them; no multi-hop routing is provided.
 
 The local demo also deploys a mock 18-decimal PURR, seeds HYPE/PURR and leaves USDC/PURR uncreated for the integration test. Generated `NEXT_PUBLIC_LOCAL_PURR_ADDRESS` is local-only, like the other demo settings.
+
+### Oxley markets
+
+Open `/oxley` (or **Oxley markets** in the navigation) to trade active launches
+against **Oxy-USDC**, Oxley's separate testnet asset. The integration uses Oxley's
+existing liquidity and direct wallet transactions; it does not require new DEX
+contracts. See [Oxley integration](docs/OXLEY.md) for verified deployment bindings,
+market discovery, pending-transaction recovery, and test commands.
