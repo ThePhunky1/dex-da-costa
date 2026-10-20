@@ -70,7 +70,7 @@ test('Oxley buys and sells with exact approvals, reviewed minimums and mobile la
  await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Sell',exact:true}).click();await page.getByLabel('You pay').fill('100');
  await expect(go).toBeEnabled();await go.click();await expect(page.getByText('Approval confirmed. Refresh the quote, then continue to swap.')).toBeVisible();await go.click();
  await expect(page.getByText('Swap confirmed.',{exact:true})).toBeVisible();expect(transactions.at(-1).functionName).toBe('sell');
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:testInfo.outputPath('oxley-mobile.png'),fullPage:true});
+ await expect(page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Exchange & pools'})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:testInfo.outputPath('oxley-mobile.png'),fullPage:true});
  failQuote=true;await page.getByLabel('You pay').fill('101');await expect(go).toBeDisabled();await expect(page.getByRole('region',{name:'Oxley trading'}).getByRole('alert')).toContainText('Quote unavailable');
  await page.getByLabel('You pay').fill('-1');await expect(go).toBeDisabled();
  await page.evaluate(({account})=>localStorage.setItem('dex-oxley-pending-v1',JSON.stringify({account,started:Date.now()})),{account});
