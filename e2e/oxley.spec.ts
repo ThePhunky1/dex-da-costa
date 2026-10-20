@@ -59,6 +59,7 @@ test('Oxley buys and sells with exact approvals, reviewed minimums and mobile la
  });
  await page.goto('/oxley');await page.getByRole('button',{name:/MAYHEM/}).click();
  await page.getByRole('button',{name:'Connect wallet',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Browser wallet Detected'}).click();
+ await expect(page.getByRole('dialog')).not.toBeVisible();await expect(page.locator('.walletTrigger')).toContainText('0x1111');
  await page.getByLabel('You pay').fill('10');const go=page.getByRole('button',{name:'Continue · approval or swap'});
  await expect(go).toBeEnabled();await page.screenshot({path:testInfo.outputPath('oxley-desktop.png'),fullPage:true});await expect(page.locator('dd').nth(1)).toHaveText('99.5 MAYHEM');await go.click();
  await expect(page.getByText('Approval confirmed. Refresh the quote, then continue to swap.')).toBeVisible();
