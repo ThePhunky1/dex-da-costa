@@ -125,3 +125,7 @@ against **Oxy-USDC**, Oxley's separate testnet asset. The integration uses Oxley
 existing liquidity and direct wallet transactions; it does not require new DEX
 contracts. See [Oxley integration](docs/OXLEY.md) for verified deployment bindings,
 market discovery, pending-transaction recovery, and test commands.
+
+### Price monitoring
+
+The HYPE/USDC market shows its testnet reserve price and warns when it differs substantially from the mainnet reference. For a read-only estimate of rebalancing inventory, see [the simulator guide](docs/REBALANCER.md). No automated trading is enabled.

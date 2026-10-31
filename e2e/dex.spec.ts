@@ -106,3 +106,19 @@ test('last-known reference is visibly stale and expires instead of posing as liv
  await expect(page.getByText('UNAVAILABLE',{exact:true})).toBeVisible();
  await expect(page.locator('.marketNumbers')).not.toContainText('81.60');
 });
+
+test('testnet price warning uses a fresh reference and only applies to HYPE/USDC',async({page})=>{
+ await page.route('**/api/market-price',route=>route.fulfill({json:{price:1,change24h:null,fetchedAt:Date.now(),source:'Hyperliquid spot',pair:'HYPE/USDC',network:'mainnet'}}));
+ await page.goto('/');
+ const notice=page.getByTestId('pool-price-reference');
+ await expect(notice).toContainText('above the mainnet reference');
+ await expect(notice).toContainText('Swaps use the pool price');
+ await page.getByRole('button',{name:'Add liquidity',exact:true}).click();
+ await expect(notice).toContainText('does not bring the price closer');
+ await page.getByLabel('Trading pair').selectOption('HYPE-PURR');
+ await expect(notice).not.toBeVisible();
+ await page.route('**/api/market-price',route=>route.fulfill({json:{price:1,change24h:null,fetchedAt:Date.now()-120000,stale:true,source:'Hyperliquid spot',pair:'HYPE/USDC',network:'mainnet'}}));
+ await page.reload();
+ await expect(page.getByTestId('pool-price-reference')).toContainText('needed to compare prices');
+ await expect(page.getByTestId('pool-price-reference')).not.toContainText('above the mainnet reference');
+});

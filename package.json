@@ -16,7 +16,8 @@
     "demo:seed": "node scripts/local-demo.mjs",
     "test:e2e": "playwright test",
     "verify:deployment": "node scripts/verify-deployment.mjs",
-    "test:oxley": "playwright test --config playwright.oxley.config.ts"
+    "test:oxley": "playwright test --config playwright.oxley.config.ts",
+    "rebalance:simulate": "node --import tsx web/scripts/rebalance-simulate.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",

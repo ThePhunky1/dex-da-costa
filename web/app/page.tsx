@@ -1,4 +1,5 @@
 'use client';
+import {priceDivergence, poolPrice, divergenceThresholdPercent} from '../lib/rebalance';
 import {pollingInterval} from '../lib/rpc-client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
@@ -49,6 +50,9 @@ export default function Home(){
  const p=pool.data;const empty=p?.supply===0n;
  const [manualA,setManualA]=useState('');const [manualB,setManualB]=useState('');
  const referencePair=marketId==='HYPE-USDC';
+ const freshPool=!!p&&!pool.isError&&now-pool.dataUpdatedAt<=30000;
+ const testnetPrice=referencePair&&freshPool?poolPrice(p.reserveA,p.reserveB):undefined;
+ const divergence=referencePair&&freshPool?priceDivergence(p.reserveA,p.reserveB,reference,now):undefined;
  const paired=referencePair&&empty?pairedLiquidityInput(liquidityInput.text,liquidityInput.side,p?{hypeReserve:p.reserveA,usdcReserve:p.reserveB,supply:p.supply}:undefined,reference?.price):
   p?matchAmount(liquidityInput.text,liquidityInput.side==='hype'?a.decimals:b.decimals,liquidityInput.side==='hype'?b.decimals:a.decimals,liquidityInput.side==='hype'?p.reserveA:p.reserveB,liquidityInput.side==='hype'?p.reserveB:p.reserveA):'';
  const manual=empty&&!referencePair;
@@ -130,6 +134,11 @@ export default function Home(){
    <section className="trade" id="exchange" aria-label="Exchange"><div className="tradeHeading"><div><span className="eyebrow">THE EXCHANGE</span><h2>Make your move.</h2></div><span className="tradeNumber" aria-hidden="true">01 /</span></div>
     <nav className="tabs" aria-label="Exchange action">{(['swap','add','remove'] as const).map(t=><button key={t} aria-pressed={tab===t} className={tab===t?'active':''} disabled={busy} onClick={()=>setTab(t)}>{t==='swap'?'Swap':t==='add'?'Add liquidity':'Remove'}</button>)}</nav>
     <div className="marketSelector"><label htmlFor="market">Trading pair</label><select id="market" value={marketId} disabled={busy} onChange={e=>changeMarket(e.target.value)}>{markets.map(m=><option value={m.id} key={m.id}>{m.a.symbol} / {m.b.symbol}{m.a.unavailable||m.b.unavailable?' — awaiting verification':''}</option>)}</select></div>
+    {referencePair&&<div className="notice" role="status" data-testid="pool-price-reference">
+     <strong>Testnet pool price: {testnetPrice?`${testnetPrice.toLocaleString('en-US',{maximumFractionDigits:4})} USDC per HYPE`:'unavailable'}</strong>
+     {divergence?Math.abs(divergence.percent)>=divergenceThresholdPercent?<p>This pool is {Math.abs(divergence.percent).toLocaleString('en-US',{maximumFractionDigits:1})}% {divergence.percent>0?'above':'below'} the mainnet reference. Swaps use the pool price. Testnet tokens are not pegged to mainnet prices.</p>:<p>The pool is currently close to the mainnet reference, but has no guaranteed peg.</p>:<p>A fresh pool price and mainnet reference are needed to compare prices.</p>}
+     {tab==='add'&&<p>Adding liquidity at the current ratio does not bring the price closer to mainnet.</p>}
+    </div>}
     {unavailable&&<p className="notice">{b.symbol}: {unavailable}. Trading and liquidity deposits are disabled until the contract is verified.</p>}
     {!routerAddress&&<div className="notice">Testnet preview · Swaps open after pool deployment.</div>}
     {wrongNetwork&&<button className="networkSwitch" disabled={switching} onClick={()=>switchChain({chainId:elysium.id})}>{switching?'Switching…':`Switch to ${elysium.name}`}</button>}
