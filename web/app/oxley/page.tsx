@@ -1,4 +1,5 @@
 'use client';
+import {pollingInterval} from '../../lib/rpc-client';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {useInfiniteQuery,useQuery} from '@tanstack/react-query';
 import {useConnection,usePublicClient,useWalletClient,useSwitchChain} from 'wagmi';
@@ -44,7 +45,7 @@ export default function OxleyPage(){
  const rows=allRows.filter(x=>[x.name,x.symbol,x.dealId,x.coin].some(v=>v.toLowerCase().includes(filter.toLowerCase())));
  useEffect(()=>{const pages=catalog.data?.pages;if(!pages||pages.length<2||!pages.at(-1)?.hasMore||catalog.isFetching||catalog.isError)return;const t=setTimeout(()=>void catalog.fetchNextPage(),2000);return()=>clearTimeout(t);},[catalog.data,catalog.isFetching,catalog.isError,catalog.fetchNextPage]);
  const selected=allRows.find(x=>x.dealId===id);
- const market=useQuery({queryKey:['oxley-market',id],queryFn:()=>sdk!.getMarket(id!),enabled:!!sdk&&!!id,retry:false,refetchInterval:30000});
+ const market=useQuery({queryKey:['oxley-market',id],queryFn:()=>sdk!.getMarket(id!),enabled:!!sdk&&!!id,retry:false,refetchInterval:q=>pollingInterval(q.state.fetchFailureCount,30000),refetchIntervalInBackground:false});
  const m=market.data?.market;
  const decimals=buy?6:18, outDecimals=buy?18:6;
  const tokenIn=m?(buy?m.quoteToken:m.coin):undefined;
@@ -54,8 +55,8 @@ export default function OxleyPage(){
  const n=amount(settledInput,decimals);
  const quote=useQuery({queryKey:['oxley-quote',id,buy,n.toString(),address,bps],queryFn:async()=>{
   const s=await sdk!.prepareSwap({marketId:id!,tokenIn:tokenIn!,tokenOut:buy?m!.coin:m!.quoteToken,amountIn:n,caller:address!,slippageBps:bps,ttlSeconds:300});assertFreshSwap(s,address!);return s;
- },enabled:!!sdk&&!!m&&!!address&&chainId===99801&&n>0n&&!busy&&!pending,retry:false,refetchInterval:15000});
- const balances=useQuery({queryKey:['oxley-balance',tokenIn,address],queryFn:async()=>({token:await client!.readContract({address:tokenIn!,abi:erc20Abi,functionName:'balanceOf',args:[address!]}),native:await client!.getBalance({address:address!})}),enabled:!!tokenIn&&!!address&&!localDemo,refetchInterval:15000});
+ },enabled:!!sdk&&!!m&&!!address&&chainId===99801&&n>0n&&!busy&&!pending,retry:false,refetchInterval:q=>pollingInterval(q.state.fetchFailureCount),refetchIntervalInBackground:false});
+ const balances=useQuery({queryKey:['oxley-balance',tokenIn,address],queryFn:async()=>({token:await client!.readContract({address:tokenIn!,abi:erc20Abi,functionName:'balanceOf',args:[address!]}),native:await client!.getBalance({address:address!})}),enabled:!!tokenIn&&!!address&&!localDemo,retry:false,refetchInterval:q=>pollingInterval(q.state.fetchFailureCount),refetchIntervalInBackground:false});
  const s=quote.data;const fresh=!!s&&!quote.isError&&now/1000-Number(s.quote.timestamp)<=60;
  function persist(p:PendingOxley|null){if(p)localStorage.setItem(journalKey,JSON.stringify(p));else localStorage.removeItem(journalKey);setPending(p);}
  async function reconcile(){

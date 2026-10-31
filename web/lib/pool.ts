@@ -17,11 +17,12 @@ export async function readPool(client:PublicClient,router:Address,a:Token,b:Toke
    client.readContract({address:t.address!,abi:erc20Abi,functionName:'symbol',blockNumber})]);
   if(decimals!==t.decimals||symbol!==t.symbol)throw Error(`${t.symbol} contract metadata does not match. Trading is paused.`);
  }
+ const nativeBalanceRead=account?client.getBalance({address:account,blockNumber}):undefined;
  const [pair,nativeBalance,balanceA,balanceB]=await Promise.all([
   client.readContract({address:factory,abi:factoryAbi,functionName:'getPair',args:[tokenA,tokenB],blockNumber}),
-  account?client.getBalance({address:account,blockNumber}):undefined,
-  account?(a.native?client.getBalance({address:account,blockNumber}):client.readContract({address:tokenA,abi:erc20Abi,functionName:'balanceOf',args:[account],blockNumber})):undefined,
-  account?(b.native?client.getBalance({address:account,blockNumber}):client.readContract({address:tokenB,abi:erc20Abi,functionName:'balanceOf',args:[account],blockNumber})):undefined,
+  nativeBalanceRead,
+  account?(a.native?nativeBalanceRead:client.readContract({address:tokenA,abi:erc20Abi,functionName:'balanceOf',args:[account],blockNumber})):undefined,
+  account?(b.native?nativeBalanceRead:client.readContract({address:tokenB,abi:erc20Abi,functionName:'balanceOf',args:[account],blockNumber})):undefined,
  ]);
  const base={factory,wrapper,pair,tokenA,tokenB,nativeBalance,balanceA,balanceB,blockNumber,timestamp:block.timestamp};
  if(pair===zeroAddress)return {...base,exists:false,supply:0n,reserveA:0n,reserveB:0n,lpBalance:account?0n:undefined};

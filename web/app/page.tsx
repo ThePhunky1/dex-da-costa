@@ -1,4 +1,5 @@
 'use client';
+import {pollingInterval} from '../lib/rpc-client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
@@ -36,13 +37,13 @@ export default function Home(){
  const [liquidityInput,setLiquidityInput]=useState<{side:'hype'|'usdc';text:string}>({side:'usdc',text:''});const [percent,setPercent]=useState(25);
  const [bps,setBps]=useState(50);const [bootstrap,setBootstrap]=useState(false);
  const [busy,setBusy]=useState(false);const [status,setStatus]=useState('');const [error,setError]=useState('');const [hash,setHash]=useState<Hash>();
- const pool=useQuery({queryKey:['pool',elysium.id,routerAddress,marketId,address],queryFn:()=>readPool(client!,routerAddress!,a,b,address),enabled:!!client&&!!routerAddress&&!unavailable,refetchInterval:5000,retry:1});
+ const pool=useQuery({queryKey:['pool',elysium.id,routerAddress,marketId,address],queryFn:()=>readPool(client!,routerAddress!,a,b,address),enabled:!!client&&!!routerAddress&&!unavailable,refetchInterval:q=>pollingInterval(q.state.fetchFailureCount),refetchIntervalInBackground:false,retry:false});
  const [now,setNow]=useState(0);
  useEffect(()=>{setNow(Date.now());const timer=setInterval(()=>setNow(Date.now()),15000);return()=>clearInterval(timer);},[]);
  const market=useQuery<MarketPrice>({queryKey:['hype-market-reference'],queryFn:async()=>{
   const response=await fetch('/api/market-price',{cache:'no-store',signal:AbortSignal.timeout(8000)});
   if(!response.ok)throw Error('Reference unavailable');return response.json();
- },refetchInterval:30000,retry:1});
+ },refetchInterval:60000,retry:false});
  const reference=!market.isError&&isFreshMarketPrice(market.data,now)?market.data:undefined;
  const displayedReference=isDisplayableMarketPrice(market.data,now)?market.data:undefined;
  const p=pool.data;const empty=p?.supply===0n;
@@ -66,7 +67,7 @@ export default function Home(){
  const approvals=tab==='remove'?(p?.exists?[{token:p.pair,symbol:'LP tokens',amount:lp}]:[]):
   tab==='swap'?(inputToken.native?[]:[{token:inputToken.address!,symbol:inputToken.symbol,amount:n}]):
   [...(a.native?[]:[{token:a.address!,symbol:a.symbol,amount:h}]),{token:b.address!,symbol:b.symbol,amount:u}];
- const allowance=useQuery({queryKey:['allowances',elysium.id,routerAddress,address,approvals.map(x=>x.token)],queryFn:()=>Promise.all(approvals.map(x=>client!.readContract({address:x.token,abi:erc20Abi,functionName:'allowance',args:[address!,routerAddress!]}))),enabled:!!client&&!!routerAddress&&!!address&&!unavailable&&approvals.length>0,refetchInterval:5000});
+ const allowance=useQuery({queryKey:['allowances',elysium.id,routerAddress,address,approvals.map(x=>x.token)],queryFn:()=>Promise.all(approvals.map(x=>client!.readContract({address:x.token,abi:erc20Abi,functionName:'allowance',args:[address!,routerAddress!]}))),enabled:!!client&&!!routerAddress&&!!address&&!unavailable&&approvals.length>0,refetchInterval:q=>pollingInterval(q.state.fetchFailureCount,30000),refetchIntervalInBackground:false,retry:false});
  const approval=approvals.find((x,i)=>x.amount>0n&&(allowance.data?.[i]??0n)<x.amount);
  const needsApproval=!!approval;
  const wrongNetwork=isConnected&&chainId!==elysium.id;

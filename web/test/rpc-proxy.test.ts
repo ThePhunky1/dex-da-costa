@@ -46,3 +46,10 @@ test('chain checks are shared while fresh but data is always requested',async()=
  await Promise.all([forwardRpc(request,['cached'],fetcher),forwardRpc(request,['cached'],fetcher)]);
  assert.equal(chains,1);assert.equal(reads,2);
 });
+
+test('provider rate limit opens a cooldown rather than hammering it on every request',async()=>{
+ let calls=0;
+ const fetcher:typeof fetch=async()=>{calls++;return new Response('',{status:429,headers:{'Retry-After':'60'}});};
+ await forwardRpc(request,['limited-provider'],fetcher);await forwardRpc(request,['limited-provider'],fetcher);
+ assert.equal(calls,1);
+});
